@@ -25,7 +25,6 @@
 
 .tools-and-canvas-container .tools-container {
     width: var(--tool-bar-width);
-    background-color: var(--pcolor-panel);
 }
 
 .tools-and-canvas-container .canvas-container {

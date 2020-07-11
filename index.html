@@ -10,7 +10,7 @@
                 --menu-bar-height: 20px;
 
                 /* Toolbar variables */
-                --tool-bar-width: 66px;
+                --tool-bar-width: 58px;
                 --tool-bar-button-size: 25px;
                 --tool-bar-button-margin: 4px;
 
@@ -18,18 +18,27 @@
                 --resizer-size: 4px;
 
                 /* Color bar variables */
-                --bottom-bar-height: 60px;
-                --color-box-size: 26px;
-                --color-box-margin: 4px;
+                --bottom-bar-height: 38px;
+                --color-box-size: 15px;
+                --color-box-margin: 1px;
 
                 /* MS Colors */
                 --pcolor-panel: rgb(236, 233, 216);
+                --pcolor-panel-border-dark: rgb(172, 168, 153);
+                --pcolor-panel-border-light: rgb(255, 255, 255);
                 --pcolor-size-handle: rgb(49, 106, 197);
                 --pcolor-canvas-background: rgb(128, 128, 128);
                 --pcolor-button-border: rgb(122, 152, 175);
                 --pcolor-button-background-active: rgb(255, 255, 255);
             }
 
+            .panel {
+                background-color: var(--pcolor-panel);
+                border-bottom: 1px solid var(--pcolor-panel-border-dark);
+                border-top: 1px solid var(--pcolor-panel-border-light);
+                border-right: 1px solid var(--pcolor-panel-border-dark);
+                padding: 4px;
+            }
 
 
         </style>
@@ -73,9 +82,9 @@
     </head>
     <body>
         <div class="app">
-            <div class="menu-bar-container"></div>
+            <div class="menu-bar-container panel"></div>
             <div class="tools-and-canvas-container">
-                <div class="tools-container">
+                <div class="tools-container panel">
                     <div class="toolbar"></div>
                 </div>
                 <div class="canvas-container">
@@ -86,7 +95,7 @@
                     </div>
                 </div>
             </div>
-            <div class="bottom-bar-container">
+            <div class="bottom-bar-container panel">
                 <div class="color-preview">
                     <div class="background-color"></div>
                     <div class="foreground-color"></div>

@@ -1,5 +1,7 @@
-.bottom-bar-container {
+.panel.bottom-bar-container {
     display: flex;
+    padding-top: 6px;
+    padding-bottom: 4px;
 }
 
 .palette-bar {
@@ -11,27 +13,63 @@
 .palette-bar > div {
     display: flex;
     flex-direction: row;
-    flex: 1;    
     align-items: center;
 }
 
 .palette-bar > div > div {
     width: var(--color-box-size);
     height: var(--color-box-size);
-    margin-right: var(--color-box-margin);
+    margin: 0 var(--color-box-margin) var(--color-box-margin) 0;
+
+    border-left: 1px solid var(--pcolor-panel-border-dark);
+    border-top: 1px solid var(--pcolor-panel-border-dark);
+    border-right: 1px solid var(--pcolor-panel);
+    border-bottom: 1px solid var(--pcolor-panel);
+    box-shadow: inset 1px 1px 0px black;
 }
 
 .color-preview {
     width: calc(var(--bottom-bar-height) - 4px);
     height: calc(var(--bottom-bar-height) - 4px);
     position: relative;
-    background-color: gray;
+
+    border-left: 1px solid var(--pcolor-panel-border-dark);
+    border-top: 1px solid var(--pcolor-panel-border-dark);
+    border-right: 1px solid transparent;
+    border-bottom: 1px solid transparent;
+
+    background-image:
+    linear-gradient(45deg, rgb(255, 255, 255) 25%, transparent 25%), 
+    linear-gradient(135deg, rgb(255, 255, 255) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, rgb(255, 255, 255) 75%),
+    linear-gradient(135deg, transparent 75%, rgb(255, 255, 255) 75%);
+    background-size:2px 2px; /* Must be a square */
+    background-position:0 0, 1px 0, 1px -1px, 0px 1px; /* Must be half of one side of the square */
+
+    box-shadow: inset 1px 1px 0px black;
+
+    margin-right: 1px;
 }
 
 .color-preview > .foreground-color, .color-preview > .background-color {
     width: var(--color-box-size);
     height: var(--color-box-size);
     position: absolute;
+
+    border-left: 1px solid var(--pcolor-panel-border-light);
+    border-top: 1px solid var(--pcolor-panel-border-ligth);
+    border-right: 1px solid var(--pcolor-panel-border-dark);
+    border-bottom: 1px solid var(--pcolor-panel-border-dark);
+}
+
+.color-preview > .foreground-color::after, .color-preview > .background-color::after {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    bottom: 0px;
+    right: 0px;
+    content: ' ';
+    border: 1px solid var(--pcolor-panel);
 }
 
 .color-preview > .foreground-color {

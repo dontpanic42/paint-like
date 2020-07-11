@@ -6,12 +6,15 @@
 .tools-container .toolbar > div {
     width: var(--tool-bar-button-size);
     height: var(--tool-bar-button-size);
-    margin-left: var(--tool-bar-button-margin);
     background-size: calc(var(--tool-bar-button-size) - 8px);
     background-repeat: no-repeat;
     background-position: center;
     border: 1px solid transparent;
     border-radius: 3px;
+}
+
+.tools-container .toolbar > div:nth-child(even) {
+    margin-left: var(--tool-bar-button-margin);
 }
 
 .tools-container .toolbar > div:hover {
