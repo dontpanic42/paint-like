@@ -1,4 +1,4 @@
-class PaintBrushTool extends Tool {
+class PaintLineTool extends Tool {
     constructor(canvas) {
         super();
 
@@ -15,6 +15,8 @@ class PaintBrushTool extends Tool {
         };
 
         this.mouseMoveEventHandler = (e) => {
+            this.canvas.clearPreview();
+
             const rect = this.canvas.htmlElement.getBoundingClientRect();
             const ctx = this.canvas.previewContext;
             
@@ -22,9 +24,6 @@ class PaintBrushTool extends Tool {
             ctx.moveTo(this.previousPoint.x - rect.left, this.previousPoint.y - rect.top);
             ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
             ctx.stroke();
-
-            this.previousPoint.x = e.clientX
-            this.previousPoint.y = e.clientY
         };
     }
 
@@ -37,9 +36,9 @@ class PaintBrushTool extends Tool {
     }
 
     getButtonCssClass() {
-        return 'paint-brush-tool-button';
-    }
-
+        return 'paint-line-tool-button';
+    }    
+    
     // Called when the tool was selected by the user
     onActivate() {
         this.canvas.addEventListener('mousedown', this.mouseDownEventHandler);
@@ -55,15 +54,14 @@ class PaintBrushTool extends Tool {
     }
 }
 
-class PaintBrush extends Plugin {
+class PaintLine extends Plugin {
     constructor() {
         super();
-        console.log('THis is the paintbrush tool!');
     }
 
     getResources() {
         return { 
-            css: ['paintbrush.css']
+            css: ['paintline.css']
         };
     }
 
@@ -71,9 +69,9 @@ class PaintBrush extends Plugin {
         const appCore = this.getAppManager().core;
         const canvas = appCore.drawingArea.canvas;
 
-        appCore.toolManager.addTool(new PaintBrushTool(canvas));
+        appCore.toolManager.addTool(new PaintLineTool(canvas));
     }
 }
 
 // Register plugin in plugin registry
-window.plugins.PaintBrush = PaintBrush;
+window.plugins.PaintLine = PaintLine;

@@ -23,6 +23,7 @@
         </style>
 
         <script type="application/javascript" src="js/basic.js"></script>
+        <script type="application/javascript" src="js/color.js"></script>
         <script type="application/javascript" src="js/drawingarea.js"></script>
         <script type="application/javascript" src="js/toolbase.js"></script>
         <script type="application/javascript">
@@ -40,14 +41,16 @@
                     core: {
                         drawingArea: new DrawingArea(document.querySelector('.canvas-background')),
                         toolManager: new ToolManager(),
-                        pluginLoader: new PluginLoader()
+                        pluginLoader: new PluginLoader(),
+                        colorManager: new ColorManager()
                     }
                 }
 
                 toolBar = new ToolBar(appManager.core.toolManager, document.querySelector('.toolbar'));
 
                 await Promise.all([
-                    appManager.core.pluginLoader.loadPlugin('PaintBrush')
+                    appManager.core.pluginLoader.loadPlugin('PaintBrush'),
+                    appManager.core.pluginLoader.loadPlugin('PaintLine')
                 ]);
             };
 

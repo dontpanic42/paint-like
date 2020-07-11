@@ -31,3 +31,9 @@
     bottom: calc(50% - var(--resizer-size) * -1 / 2);
     cursor: ew-resize;
 }
+
+.canvas-background canvas {
+    position: absolute;
+    left: 0;
+    top: 0;
+}
