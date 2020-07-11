@@ -1,0 +1,17 @@
+.tools-container .toolbar {
+    display: flex;
+    flex-flow: row wrap;
+}
+
+.tools-container .toolbar > * {
+    width: var(--tool-bar-button-size);
+    height: var(--tool-bar-button-size);
+    background-color: cyan;
+    margin: var(--tool-bar-button-margin);
+    background-size: contain;
+    background-repeat: no-repeat;
+}
+
+.tools-container .toolbar > .active {
+    background-color: blue;
+}

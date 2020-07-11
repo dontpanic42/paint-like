@@ -1,0 +1,75 @@
+<html>
+    <head>
+        <style>
+            @import url('css/baselayout.css');
+            @import url('css/toolbar.css');
+            @import url('css/canvas.css');
+
+            :root {
+                --menu-bar-height: 20px;
+                --bottom-bar-height: 60px;
+
+                /* Toolbar variables */
+                --tool-bar-width: 80px;
+                --tool-bar-button-size: 36px;
+                --tool-bar-button-margin: 2px;
+
+                /* Canvas variables */
+                --resizer-size: 4px;
+            }
+
+
+
+        </style>
+
+        <script type="application/javascript" src="js/basic.js"></script>
+        <script type="application/javascript" src="js/drawingarea.js"></script>
+        <script type="application/javascript" src="js/toolbase.js"></script>
+        <script type="application/javascript">
+            const ENUM_DIR_HORIZONTAL = 1;
+            const ENUM_DIR_VERTICAL = 2;
+
+            let drawingArea = null;
+            let toolManager = null;
+            let toolBar = null;
+            let appManager = null;
+
+            const initApp = async function() {
+
+                appManager = {
+                    core: {
+                        drawingArea: new DrawingArea(document.querySelector('.canvas-background')),
+                        toolManager: new ToolManager(),
+                        pluginLoader: new PluginLoader()
+                    }
+                }
+
+                toolBar = new ToolBar(appManager.core.toolManager, document.querySelector('.toolbar'));
+
+                await Promise.all([
+                    appManager.core.pluginLoader.loadPlugin('PaintBrush')
+                ]);
+            };
+
+            document.addEventListener('DOMContentLoaded', initApp, false);
+        </script>
+    </head>
+    <body>
+        <div class="app">
+            <div class="menu-bar-container"></div>
+            <div class="tools-and-canvas-container">
+                <div class="tools-container">
+                    <div class="toolbar"></div>
+                </div>
+                <div class="canvas-container">
+                    <div class="canvas-background">
+                        <div class="resizer br-resizer"></div>
+                        <div class="resizer r-resizer"></div>
+                        <div class="resizer b-resizer"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="bottom-bar-container"></div>
+        </div>
+    </body>
+</html>

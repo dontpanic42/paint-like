@@ -1,0 +1,33 @@
+.canvas-background {
+    background-color: white;
+    width: 200px;
+    height: 300px;
+
+    position: relative;
+}
+
+.canvas-background .resizer {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background-color: blue;
+    content: ' ';
+}
+
+.canvas-background .resizer.br-resizer {
+    right: calc(var(--resizer-size) * -1);
+    bottom: calc(var(--resizer-size) * -1);
+    cursor: nwse-resize;
+}
+
+.canvas-background .resizer.b-resizer {
+    right: calc(50% - var(--resizer-size) * -1 / 2);
+    bottom: calc(var(--resizer-size) * -1);
+    cursor: ns-resize;
+}
+
+.canvas-background .resizer.r-resizer {
+    right: calc(var(--resizer-size) * -1);
+    bottom: calc(50% - var(--resizer-size) * -1 / 2);
+    cursor: ew-resize;
+}

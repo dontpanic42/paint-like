@@ -1,0 +1,42 @@
+
+* { 
+    padding: 0; margin: 0; 
+}
+
+.app {
+    display: flex;    
+    height: 100%;
+    flex-direction: column;
+    align-items: stretch;
+}
+
+.menu-bar-container {
+    background-color: blue;
+    height: var(--menu-bar-height);
+}
+
+.tools-and-canvas-container {
+    flex: 1;
+    background-color: green;
+
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+}
+
+.tools-and-canvas-container .tools-container {
+    width: var(--tool-bar-width);
+    background-color: yellow;
+}
+
+.tools-and-canvas-container .canvas-container {
+    flex: 1;
+    background-color: gray;
+    padding: 4px;
+    overflow: scroll;
+}
+
+.bottom-bar-container {
+    height: var(--bottom-bar-height);
+    background-color: red;
+}
