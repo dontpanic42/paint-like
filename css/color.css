@@ -1,3 +1,7 @@
+.bottom-bar-container {
+    display: flex;
+}
+
 .palette-bar {
     display: flex;
     flex-direction: column;
@@ -14,5 +18,30 @@
 .palette-bar > div > div {
     width: var(--color-box-size);
     height: var(--color-box-size);
-    margin-right: 4px;
+    margin-right: var(--color-box-margin);
+}
+
+.color-preview {
+    width: calc(var(--bottom-bar-height) - 4px);
+    height: calc(var(--bottom-bar-height) - 4px);
+    position: relative;
+    background-color: gray;
+}
+
+.color-preview > .foreground-color, .color-preview > .background-color {
+    width: var(--color-box-size);
+    height: var(--color-box-size);
+    position: absolute;
+}
+
+.color-preview > .foreground-color {
+    background-color: green;
+    top: 12.5%;
+    left: 12.5%;
+}
+
+.color-preview > .background-color {
+    background-color: black;
+    top: 37.5%;
+    left: 37.5%;
 }

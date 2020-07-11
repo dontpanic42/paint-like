@@ -1,6 +1,6 @@
 class ColorManager extends EventEmitter {
     constructor() {
-        super();
+        super(false);
 
         this.palette = [
             [0,255,255],
@@ -33,13 +33,13 @@ class ColorManager extends EventEmitter {
     }
 
     setForegroundColor(index) {
-        this.emitEvent('setforegroundcolor', index, this.palette[index], this.getPaletteColorAsString(index));
         this.selectedForegroundColor = index;
+        this.emitEvent('setforegroundcolor', index, this.palette[index], this.getPaletteColorAsString(index));
     }
 
     setBackgroundColor(index) {
-        this.emitEvent('setbackgroundcolor', index, this.palette[index], this.getPaletteColorAsString(index));
         this.selectedBackgroundColor = index;
+        this.emitEvent('setbackgroundcolor', index, this.palette[index], this.getPaletteColorAsString(index));
     }
 
     setPaletteColor(index, rgb) {
@@ -78,5 +78,23 @@ class ColorBar {
         parent.appendChild(element);
 
         this.boxes[index] = element;
+    }
+}
+
+class ColorPreview {
+    constructor(colorManager, htmlElementFg, htmlElementBg) {
+        this.htmlElementFg = htmlElementFg;
+        this.htmlElementBg = htmlElementBg;
+        this.colorManager = colorManager;
+
+        this.colorManager.addEventListener('setforegroundcolor', () => this.updatePreview());        
+        this.colorManager.addEventListener('setbackgroundcolor', () => this.updatePreview());   
+        
+        this.updatePreview();
+    }
+
+    updatePreview() {
+        this.htmlElementFg.style.backgroundColor = this.colorManager.getForegroundColor();
+        this.htmlElementBg.style.backgroundColor = this.colorManager.getBackgroundColor();
     }
 }

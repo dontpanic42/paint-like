@@ -20,6 +20,7 @@
                 /* Color bar variables */
                 --bottom-bar-height: 60px;
                 --color-box-size: 26px;
+                --color-box-margin: 4px;
             }
 
 
@@ -50,6 +51,9 @@
 
                 toolBar = new ToolBar(appManager.core.toolManager, document.querySelector('.toolbar'));
                 colorBar = new ColorBar(appManager.core.colorManager, document.querySelector('.palette-bar'));
+                colorPreview = new ColorPreview(appManager.core.colorManager, 
+                    document.querySelector('.color-preview > .foreground-color'),
+                    document.querySelector('.color-preview > .background-color'));
 
                 await Promise.all([
                     appManager.core.pluginLoader.loadPlugin('PaintBrush'),
@@ -76,6 +80,10 @@
                 </div>
             </div>
             <div class="bottom-bar-container">
+                <div class="color-preview">
+                    <div class="background-color"></div>
+                    <div class="foreground-color"></div>
+                </div>
                 <div class="palette-bar">
                     <div class="palette-top"></div>
                     <div class="palette-bottom"></di>
