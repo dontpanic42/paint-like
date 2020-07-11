@@ -1,8 +1,10 @@
 class PaintBrushTool extends Tool {
-    constructor(canvas) {
+    constructor(canvas, color) {
         super();
 
         this.canvas = canvas;
+        this.color = color;
+
         this.previousPoint = {x: 0, y: 0};
 
         this.mouseDownEventHandler = (e) => {
@@ -19,6 +21,7 @@ class PaintBrushTool extends Tool {
             const ctx = this.canvas.previewContext;
             
             ctx.beginPath();
+            ctx.strokeStyle = this.color.getForegroundColor();
             ctx.moveTo(this.previousPoint.x - rect.left, this.previousPoint.y - rect.top);
             ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
             ctx.stroke();
@@ -70,8 +73,9 @@ class PaintBrush extends Plugin {
     init() {
         const appCore = this.getAppManager().core;
         const canvas = appCore.drawingArea.canvas;
+        const color = appCore.colorManager;
 
-        appCore.toolManager.addTool(new PaintBrushTool(canvas));
+        appCore.toolManager.addTool(new PaintBrushTool(canvas, color));
     }
 }
 

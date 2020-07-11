@@ -1,3 +1,6 @@
+const ENUM_DIR_HORIZONTAL = 1;
+const ENUM_DIR_VERTICAL = 2;
+
 class DrawingArea extends EventEmitter {
     constructor(htmlElement) {
         super(); 

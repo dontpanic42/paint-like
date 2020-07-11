@@ -4,10 +4,10 @@
             @import url('css/baselayout.css');
             @import url('css/toolbar.css');
             @import url('css/canvas.css');
+            @import url('css/color.css');
 
             :root {
                 --menu-bar-height: 20px;
-                --bottom-bar-height: 60px;
 
                 /* Toolbar variables */
                 --tool-bar-width: 80px;
@@ -16,6 +16,10 @@
 
                 /* Canvas variables */
                 --resizer-size: 4px;
+
+                /* Color bar variables */
+                --bottom-bar-height: 60px;
+                --color-box-size: 26px;
             }
 
 
@@ -27,8 +31,6 @@
         <script type="application/javascript" src="js/drawingarea.js"></script>
         <script type="application/javascript" src="js/toolbase.js"></script>
         <script type="application/javascript">
-            const ENUM_DIR_HORIZONTAL = 1;
-            const ENUM_DIR_VERTICAL = 2;
 
             let drawingArea = null;
             let toolManager = null;
@@ -47,6 +49,7 @@
                 }
 
                 toolBar = new ToolBar(appManager.core.toolManager, document.querySelector('.toolbar'));
+                colorBar = new ColorBar(appManager.core.colorManager, document.querySelector('.palette-bar'));
 
                 await Promise.all([
                     appManager.core.pluginLoader.loadPlugin('PaintBrush'),
@@ -72,7 +75,12 @@
                     </div>
                 </div>
             </div>
-            <div class="bottom-bar-container"></div>
+            <div class="bottom-bar-container">
+                <div class="palette-bar">
+                    <div class="palette-top"></div>
+                    <div class="palette-bottom"></di>
+                </div>
+            </div>
         </div>
     </body>
 </html>

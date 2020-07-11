@@ -1,0 +1,18 @@
+.palette-bar {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.palette-bar > div {
+    display: flex;
+    flex-direction: row;
+    flex: 1;    
+    align-items: center;
+}
+
+.palette-bar > div > div {
+    width: var(--color-box-size);
+    height: var(--color-box-size);
+    margin-right: 4px;
+}
