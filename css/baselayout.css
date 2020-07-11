@@ -11,13 +11,12 @@
 }
 
 .menu-bar-container {
-    background-color: blue;
+    background-color: var(--pcolor-panel);
     height: var(--menu-bar-height);
 }
 
 .tools-and-canvas-container {
     flex: 1;
-    background-color: green;
 
     display: flex;
     flex-direction: row;
@@ -26,17 +25,17 @@
 
 .tools-and-canvas-container .tools-container {
     width: var(--tool-bar-width);
-    background-color: yellow;
+    background-color: var(--pcolor-panel);
 }
 
 .tools-and-canvas-container .canvas-container {
     flex: 1;
-    background-color: gray;
+    background-color: var(--pcolor-canvas-background);
     padding: 4px;
     overflow: scroll;
 }
 
 .bottom-bar-container {
     height: var(--bottom-bar-height);
-    background-color: red;
+    background-color: var(--pcolor-panel);
 }

@@ -3,15 +3,22 @@
     flex-flow: row wrap;
 }
 
-.tools-container .toolbar > * {
+.tools-container .toolbar > div {
     width: var(--tool-bar-button-size);
     height: var(--tool-bar-button-size);
-    background-color: cyan;
-    margin: var(--tool-bar-button-margin);
-    background-size: contain;
+    margin-left: var(--tool-bar-button-margin);
+    background-size: calc(var(--tool-bar-button-size) - 8px);
     background-repeat: no-repeat;
+    background-position: center;
+    border: 1px solid transparent;
+    border-radius: 3px;
+}
+
+.tools-container .toolbar > div:hover {
+    border: 1px solid var(--pcolor-button-border);
 }
 
 .tools-container .toolbar > .active {
-    background-color: blue;
+    background-color: var(--pcolor-button-background-active);
+    border: 1px solid var(--pcolor-button-border);
 }

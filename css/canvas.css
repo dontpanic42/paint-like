@@ -10,7 +10,7 @@
     position: absolute;
     width: 4px;
     height: 4px;
-    background-color: blue;
+    background-color: var(--pcolor-size-handle);
     content: ' ';
 }
 
