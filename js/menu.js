@@ -1,3 +1,6 @@
+const ENUM_MENUPOSITION_BOTTOM = 1;
+const ENUM_MENUPOSITION_RIGHT = 2;
+
 class MenuItem extends EventEmitter {
 
     static menuItemIdCounter = 0;
@@ -64,10 +67,16 @@ class MenuManager {
 
         this.menuRoot.addChild(new MenuItem('Edit'));
 
+        let zoomMenu = new MenuItem('Zoom');
+        zoomMenu.addChild(new MenuItem('100%'));
+        zoomMenu.addChild(new MenuItem('125%'));
+        zoomMenu.addChild(new MenuItem('150%'));
+        zoomMenu.addChild(new MenuItem('200%'));
+
         let viewMenu = new MenuItem('View');
         viewMenu.addChild(new MenuItem('Foo'));
         viewMenu.addChild(new MenuItem('Bar'));
-        viewMenu.addChild(new MenuItem('Batz'));
+        viewMenu.addChild(zoomMenu);
         viewMenu.addChild(new MenuItem('Foobar'));
         this.menuRoot.addChild(viewMenu);
 
@@ -133,7 +142,7 @@ class MenuBar {
         });
 
         // Initialize sub menus
-        new Menu(child, el);
+        new Menu(child, el, ENUM_MENUPOSITION_BOTTOM);
     }
 
     removeChild(child) {
@@ -148,12 +157,14 @@ class MenuBar {
 }
 
 class Menu {
-    constructor(menuItem, parentHtmlElement) {
+    constructor(menuItem, parentHtmlElement, menuPosition) {
         this.parentHtmlElement = parentHtmlElement;
         this.menuItem = menuItem;
+        this.menuPosition = menuPosition;
 
         this.htmlElement = document.createElement('div');
         this.htmlElement.classList.add('menu');
+        this.htmlElement.classList.add((this.menuPosition == ENUM_MENUPOSITION_BOTTOM)? 'menu-bottom' : 'menu-right');
         this.parentHtmlElement.appendChild(this.htmlElement);
 
         this.childElements = {};
@@ -181,8 +192,12 @@ class Menu {
         const el = document.createElement('div');
         el.innerText = child.getName();
         el.classList.add('menu-item');
+        el.onmouseover = () => child.setActive(true);
+        el.onmouseout = () => child.setActive(false);
         this.htmlElement.appendChild(el);
         this.childElements[child.getId()] = el;
+
+        new Menu(child, el, ENUM_MENUPOSITION_RIGHT);
     }
 
     removeChild(child) {

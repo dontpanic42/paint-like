@@ -31,8 +31,6 @@
 
 .menu-bar-container .menu {
     position: absolute;
-    left: 0;
-    top: var(--menu-bar-height);
     z-index: 1000;
 
     background-color: var(--pcolor-menu-background-color);
@@ -43,12 +41,24 @@
     display: none;
 }
 
+.menu-bar-container .menu.menu-bottom {
+    left: 0;
+    top: var(--menu-bar-height);
+}
+
+.menu-bar-container .menu.menu-right {
+    left: calc(100% - 2px);
+    top: -2px;
+}
+
 .menu-bar-container .menu.active {
     display: block;
     color: var(--pcolor-default-font-color);
 }
 
 .menu-bar-container .menu.active .menu-item {
+    /* Required for sub-menus */
+    position: relative;
     padding: 0 20px;
 }
 
