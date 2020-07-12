@@ -6,7 +6,7 @@ class MenuItem extends EventEmitter {
     static menuItemIdCounter = 0;
 
     constructor(name) {
-        super(true);
+        super();
 
         this.name = name;
         this.active = false;
