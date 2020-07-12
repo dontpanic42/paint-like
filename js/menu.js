@@ -3,10 +3,10 @@ class MenuItem extends EventEmitter {
     static menuItemIdCounter = 0;
 
     constructor(name) {
-        super();
+        super(true);
 
         this.name = name;
-        this.active = true;
+        this.active = false;
         this.children = [];
         this.menuItemId = `menu-item-${this.menuItemIdCounter++}`;
     }
@@ -17,6 +17,10 @@ class MenuItem extends EventEmitter {
 
     getChildren() {
         return this.children;
+    }
+
+    hasChildren() {
+        return this.children.length > 0;
     }
 
     addChild(child) {
@@ -51,9 +55,22 @@ class MenuItem extends EventEmitter {
 class MenuManager {
     constructor() {
         this.menuRoot = new MenuItem('root');
-        this.menuRoot.addChild(new MenuItem('File'));
+
+        let fileMenu = new MenuItem('File');
+        fileMenu.addChild(new MenuItem('About'));
+        fileMenu.addChild(new MenuItem('Save...'));
+        fileMenu.addChild(new MenuItem('Exit'));
+        this.menuRoot.addChild(fileMenu);
+
         this.menuRoot.addChild(new MenuItem('Edit'));
-        this.menuRoot.addChild(new MenuItem('View'));
+
+        let viewMenu = new MenuItem('View');
+        viewMenu.addChild(new MenuItem('Foo'));
+        viewMenu.addChild(new MenuItem('Bar'));
+        viewMenu.addChild(new MenuItem('Batz'));
+        viewMenu.addChild(new MenuItem('Foobar'));
+        this.menuRoot.addChild(viewMenu);
+
         this.menuRoot.addChild(new MenuItem('Image'));
         this.menuRoot.addChild(new MenuItem('Colors'));
         this.menuRoot.addChild(new MenuItem('Help'));
@@ -83,6 +100,40 @@ class MenuBar {
         el.classList.add('menu-bar-item');
         this.htmlElement.appendChild(el);
         this.elements[child.getId()] = el;
+
+        // Event handler for clicking on the item
+        const childClickEventHandler = (e) => {
+            if(child.isActive()) {
+                child.setActive(false);
+                // We are now deactivated, so we don't need the global event handler any more, since
+                // we only want a click directly on the element to activate it again
+                document.removeEventListener('click', childClickEventHandler);
+            } else {
+                child.setActive(true);
+
+                // When active, we want a click anywhere in the window to deactivate the item
+                // Also, we have to do this in a timeout so that this even does not get bubbled up
+                // to the new deven listener we just attached.
+                // Also, stoping event propagation is not an option since we might need to trigger
+                // other event handlers (like for other active elements), so this is the safest option
+                setTimeout(() => document.addEventListener('click', childClickEventHandler, false));
+            }
+        }
+
+        // Attach event handler to the element
+        el.addEventListener('click', childClickEventHandler, false);
+
+        // Event handler for state changes
+        child.addEventListener('activechange', (_, active) => {
+            if(active) {
+                el.classList.add('active');
+            } else {
+                el.classList.remove('active');
+            }
+        });
+
+        // Initialize sub menus
+        new Menu(child, el);
     }
 
     removeChild(child) {
@@ -97,5 +148,50 @@ class MenuBar {
 }
 
 class Menu {
+    constructor(menuItem, parentHtmlElement) {
+        this.parentHtmlElement = parentHtmlElement;
+        this.menuItem = menuItem;
 
+        this.htmlElement = document.createElement('div');
+        this.htmlElement.classList.add('menu');
+        this.parentHtmlElement.appendChild(this.htmlElement);
+
+        this.childElements = {};
+
+        this.menuItem.addEventListener('activechange', (_, e) => this.menuItemActiveChange(e));
+        this.menuItem.addEventListener('addchild', (_, c) => this.addChild(c));
+        this.menuItem.addEventListener('removeChild', (_, c) => this.removeChild(c));
+
+        // Initial setup for children
+        this.menuItem.getChildren().forEach((c) => this.addChild(c));
+        // Initial active state
+        this.menuItemActiveChange(this.menuItem.isActive());
+    }
+
+    menuItemActiveChange(active) {
+        // Only show the menu if the item actually has children
+        if(active && this.menuItem.hasChildren()) {
+            this.htmlElement.classList.add('active');
+        } else {
+            this.htmlElement.classList.remove('active');
+        }
+    }
+
+    addChild(child) {
+        const el = document.createElement('div');
+        el.innerText = child.getName();
+        el.classList.add('menu-item');
+        this.htmlElement.appendChild(el);
+        this.childElements[child.getId()] = el;
+    }
+
+    removeChild(child) {
+        const el = this.childElements[child.getId()];
+        if(el) {
+            this.htmlElement.removeChild(el);
+            delete this.childElements[child.getId()];
+        } else {
+            console.warn('[Menu]: Attempting to remove child that does not exist', child);
+        }
+    }
 }
