@@ -1,0 +1,29 @@
+.menu-bar-container.panel {
+    display: flex;
+    flex-direction: row;
+    padding: 0;
+    border-top: 0;
+    position: relative;
+}
+
+/* White line under the menu bar...*/
+.menu-bar-container.panel::after {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 0;
+    border-bottom: var(--menu-bar-bottom-white-line) solid var(--pcolor-panel-border-light);
+    content: ' ';
+}
+
+.menu-bar-container .menu-bar-item {
+    padding: 0 var(--menu-bar-item-margin) var(--menu-bar-bottom-white-line) var(--menu-bar-item-margin);
+    line-height: var(--menu-bar-height);
+    user-select: none;
+}
+
+.menu-bar-container .menu-bar-item:hover, .menu-bar-container .menu-bar-item.active {
+    background-color: var(--pcolor-menu-item-active);
+    color: var(--pcolor-menu-item-active-fontcolor);
+}

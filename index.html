@@ -5,9 +5,13 @@
             @import url('css/toolbar.css');
             @import url('css/canvas.css');
             @import url('css/color.css');
+            @import url('css/menu.css');
 
             :root {
-                --menu-bar-height: 20px;
+                /* Menubar */
+                --menu-bar-height: 21px;
+                --menu-bar-item-margin: 8px;
+                --menu-bar-bottom-white-line: 1px;
 
                 /* Toolbar variables */
                 --tool-bar-width: 58px;
@@ -30,6 +34,8 @@
                 --pcolor-canvas-background: rgb(128, 128, 128);
                 --pcolor-button-border: rgb(122, 152, 175);
                 --pcolor-button-background-active: rgb(255, 255, 255);
+                --pcolor-menu-item-active: rgb(49, 105, 198);
+                --pcolor-menu-item-active-fontcolor: rgb(255, 255, 255);
             }
 
             .panel {
@@ -47,12 +53,14 @@
         <script type="application/javascript" src="js/color.js"></script>
         <script type="application/javascript" src="js/drawingarea.js"></script>
         <script type="application/javascript" src="js/toolbase.js"></script>
+        <script type="application/javascript" src="js/menu.js"></script>
         <script type="application/javascript">
 
             let drawingArea = null;
             let toolManager = null;
             let toolBar = null;
             let appManager = null;
+            let menuBar = null;
 
             const initApp = async function() {
 
@@ -61,15 +69,20 @@
                         drawingArea: new DrawingArea(document.querySelector('.canvas-background')),
                         toolManager: new ToolManager(),
                         pluginLoader: new PluginLoader(),
-                        colorManager: new ColorManager()
+                        colorManager: new ColorManager(),
+                        menuManager: new MenuManager()
                     }
                 }
 
-                toolBar = new ToolBar(appManager.core.toolManager, document.querySelector('.toolbar'));
-                colorBar = new ColorBar(appManager.core.colorManager, document.querySelector('.palette-bar'));
+                toolBar = new ToolBar(appManager.core.toolManager, 
+                    document.querySelector('.toolbar'));
+                colorBar = new ColorBar(appManager.core.colorManager, 
+                    document.querySelector('.palette-bar'));
                 colorPreview = new ColorPreview(appManager.core.colorManager, 
                     document.querySelector('.color-preview > .foreground-color'),
                     document.querySelector('.color-preview > .background-color'));
+                menuBar = new MenuBar(appManager.core.menuManager, 
+                    document.querySelector('.menu-bar-container'));
 
                 await Promise.all([
                     appManager.core.pluginLoader.loadPlugin('PaintBrush'),

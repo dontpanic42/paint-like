@@ -1,6 +1,8 @@
 
 * { 
     padding: 0; margin: 0; 
+    font-family: 'Tahoma';
+    font-size: 12px;
 }
 
 .app {
@@ -12,7 +14,6 @@
 
 .menu-bar-container {
     background-color: var(--pcolor-panel);
-    height: var(--menu-bar-height);
 }
 
 .tools-and-canvas-container {
@@ -29,7 +30,6 @@
 
 .tools-and-canvas-container .canvas-container {
     flex: 1;
-    background-color: var(--pcolor-canvas-background);
     padding: 4px;
     overflow: scroll;
 }
