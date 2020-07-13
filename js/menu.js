@@ -3,8 +3,6 @@ const ENUM_MENUPOSITION_RIGHT = 2;
 
 class MenuItem extends EventEmitter {
 
-    static menuItemIdCounter = 0;
-
     constructor(name) {
         super();
 
@@ -54,6 +52,10 @@ class MenuItem extends EventEmitter {
         return this.menuItemId;
     }
 }
+
+// Safari does not support static class members yet, so set it
+// up the oldschool way...
+MenuItem.menuItemIdCounter = 0;
 
 class MenuManager {
     constructor() {

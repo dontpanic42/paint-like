@@ -21,6 +21,10 @@
     padding: 0 var(--menu-bar-item-margin) var(--menu-bar-bottom-white-line) var(--menu-bar-item-margin);
     line-height: var(--menu-bar-height);
     user-select: none;
+    /* Safari doesn't know the user-select prop yet */
+    -webkit-user-select: none;
+    /* Safari shows a text selector even though user-select none, so fix that */
+    cursor: pointer;
     position: relative;
 }
 
