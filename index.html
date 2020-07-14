@@ -86,7 +86,7 @@
                     document.querySelector('.color-preview > .background-color'));
                 menuBar = new MenuBar(appManager.core.menuManager, 
                     document.querySelector('.menu-bar-container'));
-
+                
                 await Promise.all([
                     appManager.core.pluginLoader.loadPlugin('PaintBrush'),
                     appManager.core.pluginLoader.loadPlugin('PaintLine')
@@ -122,5 +122,15 @@
                 </div>
             </div>
         </div>
+
+        <!-- Menu templates-->
+        <template id="menu-bar-item-template">
+            <div class="menu-item">
+                <div class="menu-icon"></div>
+                <div class="menu-title"></div>
+                <div class="menu-submenu-arrow"></div>
+            </div>
+        </template>
+
     </body>
 </html>

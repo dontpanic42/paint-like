@@ -28,6 +28,36 @@
     position: relative;
 }
 
+.menu-bar-container .menu-item {
+    display: flex;
+}
+
+.menu-bar-container .menu-item .menu-icon {
+    width: 40px;
+}
+
+.menu-bar-container .menu-item .menu-title {
+    flex: 1;
+}
+
+/* Submenu arrow default */
+.menu-bar-container .menu-item > .menu-submenu-arrow {
+    display: none;
+}
+
+/* Submenu arrow for menu with submenu */
+.menu-bar-container .menu-item.menu-item-with-submenu > .menu-submenu-arrow {
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 4px 0 4px 4px;
+    border-color: transparent transparent transparent black;
+    position: absolute;
+    top: calc(50% - 4px);
+    right: 20px;
+    display: block;
+}
+
 .menu-bar-container .menu-bar-item:hover, .menu-bar-container .menu-bar-item.active {
     background-color: var(--pcolor-menu-item-active);
     color: var(--pcolor-menu-item-active-fontcolor);

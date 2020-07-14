@@ -175,6 +175,8 @@ class Menu {
         this.menuItem.addEventListener('addchild', (_, c) => this.addChild(c));
         this.menuItem.addEventListener('removeChild', (_, c) => this.removeChild(c));
 
+        // Handler that is triggered everytime a child item adds/removes a child item
+        this.childSubMenuHandler = (c) => this.updateChildItemStyle(c);
         // Initial setup for children
         this.menuItem.getChildren().forEach((c) => this.addChild(c));
         // Initial active state
@@ -190,21 +192,58 @@ class Menu {
         }
     }
 
+    /**
+     * Checks if the give item has children, and if yes, adds a css class
+     * Used for the arrow next to menu item with submenus.
+     * @param {MenuItem} child 
+     */
+    updateChildItemStyle(child) {
+        const menuItemWithSubMenuClass = 'menu-item-with-submenu';
+        const el = this.childElements[child.getId()];
+
+        if(child.hasChildren()) {
+            if(!el.classList.contains(menuItemWithSubMenuClass)) {
+                el.classList.add(menuItemWithSubMenuClass);
+            }
+        } else {
+            el.classList.remove(menuItemWithSubMenuClass);
+        }
+    }
+
     addChild(child) {
-        const el = document.createElement('div');
-        el.innerText = child.getName();
-        el.classList.add('menu-item');
+
+        // Load html template
+        const template = document.querySelector('#menu-bar-item-template');
+        // Instanciate the template into a document fragment
+        const fragment = template.content.cloneNode(true);
+        // We need the first element as reference
+        const el = fragment.querySelector('div');
+        this.htmlElement.appendChild(fragment);
+
+        // Set title
+        el.querySelector('.menu-title').innerText = child.getName();
+        // Set event handlers
         el.onmouseover = () => child.setActive(true);
         el.onmouseout = () => child.setActive(false);
-        this.htmlElement.appendChild(el);
+        // Save reference for later
         this.childElements[child.getId()] = el;
 
+        // Sub menu handling
+        child.addEventListener('addchild', this.childSubMenuHandler);
+        child.addEventListener('removeChild', this.childSubMenuHandler);
+        this.updateChildItemStyle(child);
+        // Add submenu
         new Menu(child, el, ENUM_MENUPOSITION_RIGHT);
     }
 
     removeChild(child) {
         const el = this.childElements[child.getId()];
         if(el) {
+            // Remove submenu event handlers
+            // No need to call updateChildItemStyle since the element is removed anyways
+            this.child.removeEventListener('addchild', this.childSubMenuHandler);
+            this.child.removeEventListener('removeChild', this.childSubMenuHandler);
+
             this.htmlElement.removeChild(el);
             delete this.childElements[child.getId()];
         } else {
