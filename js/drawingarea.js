@@ -3,9 +3,12 @@ const ENUM_DIR_VERTICAL = 2;
 
 class DrawingArea extends EventEmitter {
     constructor(htmlElement) {
-        super(); 
+        super(true); 
 
         this.htmlElement = htmlElement;
+
+        this.scale = {x: 1.0, y: 1.0};
+
         this.canvas = new DrawingCanvas(this);
 
         this.resizers = [
@@ -26,14 +29,25 @@ class DrawingArea extends EventEmitter {
     }
 
     setSize (width, height, final = false) {
-        this.htmlElement.style.width = `${width}px`;
-        this.htmlElement.style.height = `${height}px`;
+        this.htmlElement.style.width = `${width * this.scale.x}px`;
+        this.htmlElement.style.height = `${height * this.scale.y}px`;
 
         if (final) {
             this.emitEvent('sizeupdateend', {width: width, height: height}); 
         } else {
             this.emitEvent('sizeupdate', {width: width, height: height}); 
         }
+    }
+
+    setScale (x, y) {
+        this.scale.x = x;
+        this.scale.y = y;
+
+        this.emitEvent('scaleupdate', this.scale);
+    }
+
+    getScale () {
+        return this.scale;
     }
 };
 
@@ -59,37 +73,78 @@ class DrawingCanvas extends EventEmitter {
         this.setRawCanvasSize(this.preview, this.drawingArea.getSize());
 
         this.drawingArea.addEventListener('sizeupdateend', (s) => this.setSize(s));
+        this.drawingArea.addEventListener('scaleupdate', () => this.setSize());
 
         this.canvasMouseMoveHandler = (e) => {
-            this.emitEvent('mousemove', e);
+
+            const coords = this.clientCoordToCanvasCoords({x: e.clientX, y: e.clientY});
+            const event = {
+                canvasX: coords.x,
+                canvasY: coords.y,
+                originalEvent: e
+            };
+
+            this.emitEvent('mousemove', event);
         };
 
         this.canvasMouseUpHandler = (e) => {
             document.removeEventListener('mousemove', this.canvasMouseMoveHandler);
             document.removeEventListener('mouseup', this.canvasMouseUpHandler);
-            this.emitEvent('mouseup', e);
+
+            const coords = this.clientCoordToCanvasCoords({x: e.clientX, y: e.clientY});
+            const event = {
+                canvasX: coords.x,
+                canvasY: coords.y,
+                originalEvent: e
+            };
+
+            this.emitEvent('mouseup', event);
         };
 
         this.canvasMouseDownHandler = (e) => {
             document.addEventListener('mousemove', this.canvasMouseMoveHandler, false);
             document.addEventListener('mouseup', this.canvasMouseUpHandler, false);
-            this.emitEvent('mousedown', e);
+
+            const coords = this.clientCoordToCanvasCoords({x: e.clientX, y: e.clientY});
+            const event = {
+                canvasX: coords.x,
+                canvasY: coords.y,
+                originalEvent: e
+            };
+
+            this.emitEvent('mousedown', event);
         };
 
         this.cvs.forEach((e) => e.addEventListener('mousedown', this.canvasMouseDownHandler, false));
     }
 
-    setSize(size) {
+    clientCoordToCanvasCoords(coords) {
+        const rect = this.htmlElement.getBoundingClientRect();
+        return {
+            x: (coords.x - rect.left) / this.drawingArea.scale.x,
+            y: (coords.y - rect.top) / this.drawingArea.scale.y
+        }
+    }
+
+    setSize(size = null) {
         this.setRawCanvasSize(this.inactive, size);
         this.setRawCanvasSize(this.preview, size);
         this.swapActive();
     }
 
-    setRawCanvasSize(index, size) {
+    setRawCanvasSize(index, size = null, scale = null) {
+        if (!size) {
+            size = this.drawingArea.getSize();
+        }
+
+        if (!scale) {
+            scale = this.drawingArea.getScale();
+        }
+
         this.cvs[index].width = size.width;
         this.cvs[index].height = size.height;
-        this.cvs[index].style.width = size.width;
-        this.cvs[index].style.height = size.height;
+        this.cvs[index].style.width = size.width * scale.x;
+        this.cvs[index].style.height = size.height * scale.y;
     }
 
     swapActive() {

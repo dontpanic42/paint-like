@@ -33,7 +33,7 @@
 }
 
 .menu-bar-container .menu-item .menu-icon {
-    width: 40px;
+    width: var(--menu-icon-size);
 }
 
 .menu-bar-container .menu-item .menu-title {
@@ -50,10 +50,10 @@
     width: 0;
     height: 0;
     border-style: solid;
-    border-width: 4px 0 4px 4px;
+    border-width: var(--menu-submenu-arrow-size) 0 var(--menu-submenu-arrow-size) var(--menu-submenu-arrow-size);
     border-color: transparent transparent transparent black;
     position: absolute;
-    top: calc(50% - 4px);
+    top: calc(50% - var(--menu-submenu-arrow-size));
     right: 20px;
     display: block;
 }

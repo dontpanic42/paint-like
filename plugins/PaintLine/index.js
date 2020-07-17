@@ -7,8 +7,8 @@ class PaintLineTool extends Tool {
         this.previousPoint = {x: 0, y: 0};
 
         this.mouseDownEventHandler = (e) => {
-            this.previousPoint.x = e.clientX
-            this.previousPoint.y = e.clientY
+            this.previousPoint.x = e.canvasX;
+            this.previousPoint.y = e.canvasY;
         };
 
         this.mouseUpEventHandler = () => {
@@ -18,13 +18,12 @@ class PaintLineTool extends Tool {
         this.mouseMoveEventHandler = (e) => {
             this.canvas.clearPreview();
 
-            const rect = this.canvas.htmlElement.getBoundingClientRect();
             const ctx = this.canvas.previewContext;
             
             ctx.beginPath();
             ctx.strokeStyle = this.color.getForegroundColor();
-            ctx.moveTo(this.previousPoint.x - rect.left, this.previousPoint.y - rect.top);
-            ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
+            ctx.moveTo(this.previousPoint.x, this.previousPoint.y);
+            ctx.lineTo(e.canvasX, e.canvasY);
             ctx.stroke();
         };
     }
