@@ -59,6 +59,7 @@
         <script type="application/javascript" src="js/drawingarea.js"></script>
         <script type="application/javascript" src="js/toolbase.js"></script>
         <script type="application/javascript" src="js/menu.js"></script>
+        <script type="application/javascript" src="js/algolib.js"></script>
         <script type="application/javascript">
 
             let drawingArea = null;
@@ -76,6 +77,10 @@
                         pluginLoader: new PluginLoader(),
                         colorManager: new ColorManager(),
                         menuManager: new MenuManager()
+                    },
+
+                    util: {
+                        algoLib: new AlgoLib()
                     }
                 }
 

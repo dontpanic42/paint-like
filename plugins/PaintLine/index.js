@@ -1,30 +1,32 @@
 class PaintLineTool extends Tool {
-    constructor(canvas, color) {
+    constructor(canvas, color, algoLib) {
         super();
 
         this.canvas = canvas;
-        this.color = color;
-        this.previousPoint = {x: 0, y: 0};
+        
+        const lineWidth = 1;
+        const previousPoint = {x: 0, y: 0};
 
         this.mouseDownEventHandler = (e) => {
-            this.previousPoint.x = e.canvasX;
-            this.previousPoint.y = e.canvasY;
+            previousPoint.x = e.canvasX;
+            previousPoint.y = e.canvasY;
         };
 
         this.mouseUpEventHandler = () => {
-            this.canvas.applyPreview();
+            canvas.applyPreview();
         };
 
         this.mouseMoveEventHandler = (e) => {
-            this.canvas.clearPreview();
+            canvas.clearPreview();
 
-            const ctx = this.canvas.previewContext;
-            
-            ctx.beginPath();
-            ctx.strokeStyle = this.color.getForegroundColor();
-            ctx.moveTo(this.previousPoint.x, this.previousPoint.y);
-            ctx.lineTo(e.canvasX, e.canvasY);
-            ctx.stroke();
+            algoLib.drawLine(
+                canvas.previewContext, 
+                previousPoint.x, 
+                previousPoint.y, 
+                e.canvasX, 
+                e.canvasY, 
+                lineWidth, 
+                color.getForegroundColorAsRgb());
         };
     }
 
@@ -70,8 +72,9 @@ class PaintLine extends Plugin {
         const appCore = this.getAppManager().core;
         const canvas = appCore.drawingArea.canvas;
         const color = appCore.colorManager;
+        const algoLib = this.getAppManager().util.algoLib;
 
-        appCore.toolManager.addTool(new PaintLineTool(canvas, color));
+        appCore.toolManager.addTool(new PaintLineTool(canvas, color, algoLib));
     }
 }
 

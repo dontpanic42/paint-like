@@ -1,26 +1,22 @@
 class PaintBrushTool extends Tool {
-    constructor(canvas, color) {
+    constructor(canvas, color, algoLib) {
         super();
 
         this.canvas = canvas;
-        this.color = color;
 
-        this.size = 1;
-
-        this.previousPoint = {x: 0, y: 0};
+        const lineWidth = 1;
+        const previousPoint = {x: 0, y: 0};
 
         this.mouseDownEventHandler = (e) => {
-            this.previousPoint.x = e.canvasX
-            this.previousPoint.y = e.canvasY
-
-            // Draw initial "dot"
-            const ctx = this.canvas.previewContext;
+            previousPoint.x = e.canvasX | 0;
+            previousPoint.y = e.canvasY | 0;
             
-            ctx.beginPath();
-            ctx.lineWidth = this.size;
-            ctx.strokeStyle = this.color.getForegroundColor();
-            ctx.fillRect(e.canvasX | 0, e.canvasY | 0, 1, 1);
-            ctx.stroke();
+            algoLib.putPixel(
+                canvas.previewContext, 
+                previousPoint.x, 
+                previousPoint.y, 
+                lineWidth, 
+                color.getForegroundColorAsRgb());
         };
 
         this.mouseUpEventHandler = () => {
@@ -28,17 +24,18 @@ class PaintBrushTool extends Tool {
         };
 
         this.mouseMoveEventHandler = (e) => {
-            const ctx = this.canvas.previewContext;
             
-            ctx.beginPath();
-            ctx.lineWidth = this.size;
-            ctx.strokeStyle = this.color.getForegroundColor();
-            ctx.moveTo(this.previousPoint.x, this.previousPoint.y);
-            ctx.lineTo(e.canvasX | 0, e.canvasY | 0);
-            ctx.stroke();
+            algoLib.drawLine(
+                canvas.previewContext, 
+                previousPoint.x, 
+                previousPoint.y, 
+                e.canvasX, 
+                e.canvasY, 
+                lineWidth, 
+                color.getForegroundColorAsRgb());
 
-            this.previousPoint.x = e.canvasX | 0;
-            this.previousPoint.y = e.canvasY | 0;
+            previousPoint.x = e.canvasX | 0;
+            previousPoint.y = e.canvasY | 0;
         };
     }
 
@@ -85,8 +82,9 @@ class PaintBrush extends Plugin {
         const appCore = this.getAppManager().core;
         const canvas = appCore.drawingArea.canvas;
         const color = appCore.colorManager;
+        const algoLib = this.getAppManager().util.algoLib;
 
-        appCore.toolManager.addTool(new PaintBrushTool(canvas, color));
+        appCore.toolManager.addTool(new PaintBrushTool(canvas, color, algoLib));
     }
 }
 

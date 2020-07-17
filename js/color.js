@@ -28,8 +28,16 @@ class ColorManager extends EventEmitter {
         return this.getPaletteColorAsString(this.selectedForegroundColor);
     }
 
+    getForegroundColorAsRgb() {
+        return this.palette[this.selectedForegroundColor];
+    }
+
     getBackgroundColor() {
         return this.getPaletteColorAsString(this.selectedBackgroundColor);
+    }
+
+    getBackgroundColorAsRgb() {
+        return this.palette[this.selectedBackgroundColor];
     }
 
     setForegroundColor(index) {
