@@ -19,6 +19,7 @@ class MenuItem extends EventEmitter {
         this.enabled = true;
         this.children = [];
         this.onclick = onclick;
+        this.hotKey = undefined;
         this.menuItemId = id ? id : `menu-item-${MenuItem.menuItemIdCounter++}`;
     }
 
@@ -106,6 +107,29 @@ class MenuItem extends EventEmitter {
             this.enabled = val;
             this.emitEvent('enabledchange', this, val);
         }
+    }
+
+    /**
+     * Returns true when this menu entry has a hotkey set
+     */
+    hasHotKey() {
+        return !!this.hotKey;
+    }
+
+    /**
+     * Sets a hotkey for this menu entry
+     * @param {HotKey} hotKey the hotkey to set for this entry 
+     */
+    setHotKey(hotKey) {
+        this.hotKey = hotKey;
+        this.emitEvent('hotkeychange', this, hotKey);
+    }
+
+    /**
+     * Returns the hotkey for this menu entry
+     */
+    getHotKey() {
+        return this.hotKey;
     }
 
     /**
@@ -307,6 +331,12 @@ class Menu {
         }
     }
 
+    updateChildItemHotKeyLabel(child, el) {
+        if(child.hasHotKey()) {
+            el.querySelector('.menu-hotkey').innerText = child.getHotKey().toString();
+        }
+    }
+
     addChild(child) {
 
         // Load html template
@@ -327,6 +357,11 @@ class Menu {
                 child.emitEvent('click', child, e);
             }
         }
+
+        // Listen for changes in the childs hotkey assignment
+        child.addEventListener('hotkeychange',  this.updateChildItemHotKeyLabel.bind(this, child, el));
+        // Setup the initial label
+        this.updateChildItemHotKeyLabel(child, el);
 
         // Save reference for later
         this.childElements[child.getId()] = el;
