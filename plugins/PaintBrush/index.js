@@ -5,11 +5,22 @@ class PaintBrushTool extends Tool {
         this.canvas = canvas;
         this.color = color;
 
+        this.size = 1;
+
         this.previousPoint = {x: 0, y: 0};
 
         this.mouseDownEventHandler = (e) => {
             this.previousPoint.x = e.canvasX
             this.previousPoint.y = e.canvasY
+
+            // Draw initial "dot"
+            const ctx = this.canvas.previewContext;
+            
+            ctx.beginPath();
+            ctx.lineWidth = this.size;
+            ctx.strokeStyle = this.color.getForegroundColor();
+            ctx.fillRect(e.canvasX | 0, e.canvasY | 0, 1, 1);
+            ctx.stroke();
         };
 
         this.mouseUpEventHandler = () => {
@@ -20,13 +31,14 @@ class PaintBrushTool extends Tool {
             const ctx = this.canvas.previewContext;
             
             ctx.beginPath();
+            ctx.lineWidth = this.size;
             ctx.strokeStyle = this.color.getForegroundColor();
             ctx.moveTo(this.previousPoint.x, this.previousPoint.y);
-            ctx.lineTo(e.canvasX, e.canvasY);
+            ctx.lineTo(e.canvasX | 0, e.canvasY | 0);
             ctx.stroke();
 
-            this.previousPoint.x = e.canvasX
-            this.previousPoint.y = e.canvasY
+            this.previousPoint.x = e.canvasX | 0;
+            this.previousPoint.y = e.canvasY | 0;
         };
     }
 

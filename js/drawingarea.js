@@ -8,6 +8,8 @@ class DrawingArea extends EventEmitter {
         this.htmlElement = htmlElement;
 
         this.scale = {x: 1.0, y: 1.0};
+        // Always the PIXEL size. Actual element size = size * scale
+        this.size = {x: 600, y: 400};
 
         this.canvas = new DrawingCanvas(this);
 
@@ -23,14 +25,17 @@ class DrawingArea extends EventEmitter {
 
     getSize () {
         return {
-            width: this.htmlElement.clientWidth,
-            height: this.htmlElement.clientHeight
+            width: this.size.x,
+            height: this.size.y
         }
     }
 
     setSize (width, height, final = false) {
-        this.htmlElement.style.width = `${width * this.scale.x}px`;
-        this.htmlElement.style.height = `${height * this.scale.y}px`;
+        this.htmlElement.style.width = `${(width * this.scale.x) | 0}px`;
+        this.htmlElement.style.height = `${(height * this.scale.y) | 0}px`;
+
+        this.size.x = width;
+        this.size.y = height;
 
         if (final) {
             this.emitEvent('sizeupdateend', {width: width, height: height}); 
@@ -42,6 +47,8 @@ class DrawingArea extends EventEmitter {
     setScale (x, y) {
         this.scale.x = x;
         this.scale.y = y;
+
+        this.setSize(this.size.x, this.size.y, true);
 
         this.emitEvent('scaleupdate', this.scale);
     }
@@ -141,10 +148,10 @@ class DrawingCanvas extends EventEmitter {
             scale = this.drawingArea.getScale();
         }
 
-        this.cvs[index].width = size.width;
-        this.cvs[index].height = size.height;
-        this.cvs[index].style.width = size.width * scale.x;
-        this.cvs[index].style.height = size.height * scale.y;
+        this.cvs[index].width = size.width | 0;
+        this.cvs[index].height = size.height | 0;
+        this.cvs[index].style.width = size.width * scale.x | 0;
+        this.cvs[index].style.height = size.height * scale.y | 0;
     }
 
     swapActive() {

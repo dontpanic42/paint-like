@@ -35,10 +35,6 @@ class ZoomControlsTool extends Tool {
     }
 
     getButtonCssClass() {
-        return '';
-    } 
-
-    getButtonCssClass() {
         return 'zoom-controls-tool-button';
     }
 
