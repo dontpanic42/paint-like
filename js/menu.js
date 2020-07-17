@@ -137,30 +137,12 @@ class MenuManager {
     constructor() {
         this.menuRoot = new MenuItem('root');
 
-        let fileMenu = new MenuItem('File');
-        fileMenu.addChild(new MenuItem('About'));
-        fileMenu.addChild(new MenuItem('Save...'));
-        fileMenu.addChild(new MenuItem('Exit'));
-        this.menuRoot.addChild(fileMenu);
-
+        this.menuRoot.addChild(new MenuItem('File', 'file'));
         this.menuRoot.addChild(new MenuItem('Edit', 'edit'));
-
-        let zoomMenu = new MenuItem('Zoom');
-        zoomMenu.addChild(new MenuItem('100%'));
-        zoomMenu.addChild(new MenuItem('125%'));
-        zoomMenu.addChild(new MenuItem('150%'));
-        zoomMenu.addChild(new MenuItem('200%'));
-
-        let viewMenu = new MenuItem('View');
-        viewMenu.addChild(new MenuItem('Foo'));
-        viewMenu.addChild(new MenuItem('Bar'));
-        viewMenu.addChild(zoomMenu);
-        viewMenu.addChild(new MenuItem('Foobar'));
-        this.menuRoot.addChild(viewMenu);
-
-        this.menuRoot.addChild(new MenuItem('Image'));
-        this.menuRoot.addChild(new MenuItem('Colors'));
-        this.menuRoot.addChild(new MenuItem('Help'));
+        this.menuRoot.addChild(new MenuItem('View', 'view'));
+        this.menuRoot.addChild(new MenuItem('Image', 'image'));
+        this.menuRoot.addChild(new MenuItem('Colors', 'colors'));
+        this.menuRoot.addChild(new MenuItem('Help', 'help'));
     }
 
     /**

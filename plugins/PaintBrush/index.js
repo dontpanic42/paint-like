@@ -91,7 +91,6 @@ class PaintBrushTool extends Tool {
 class PaintBrush extends Plugin {
     constructor() {
         super();
-        console.log('THis is the paintbrush tool!');
     }
 
     getResources() {
