@@ -1,46 +1,88 @@
 const ENUM_MENUPOSITION_BOTTOM = 1;
 const ENUM_MENUPOSITION_RIGHT = 2;
 
+/**
+ * Base class for menu items
+ */
 class MenuItem extends EventEmitter {
 
-    constructor(name) {
+    /**
+     * 
+     * @param {string} name Human readable name of this item 
+     * @param {string} id (Optional) unique id for this menu item. Auto generated if not given 
+     */
+    constructor(name, id = undefined) {
         super();
 
         this.name = name;
         this.active = false;
+        this.enabled = true;
         this.children = [];
-        this.menuItemId = `menu-item-${this.menuItemIdCounter++}`;
+        this.onclick = onclick;
+        this.menuItemId = id ? id : `menu-item-${MenuItem.menuItemIdCounter++}`;
     }
 
+    /**
+     * Return the human readable name of this item
+     */
     getName() {
         return this.name;
     }
 
+    /**
+     * Returns an array of child items
+     */
     getChildren() {
         return this.children;
     }
 
+    /**
+     * Returns true when this menu item has at least on child
+     */
     hasChildren() {
         return this.children.length > 0;
     }
 
+    /**
+     * Adds a child to this menu item
+     * @param {MenuItem} child 
+     */
     addChild(child) {
         this.children.push(child);
         this.emitEvent('addchild', this, child);
     }
 
+    /**
+     * Removes a child element from this menu item
+     * @param {MenuItem} child 
+     */
     removeChild(child) {
         const index = this.children.indexOf(child);
         if(index != -1) {
             this.children.splice(index, 1);
             this.emitEvent('removechild', this, child);
+        } else {
+            console.warn('[MenuItem]: Attempt to remove child element that does not exist', child);
         }
     }
 
+    /**
+     * Returns whether or not this menu item is active.
+     * 
+     * An item is considered 'active' when either the mouse is
+     * over the elment or it has an open submenu.
+     */
     isActive() {
         return this.active;
     }
 
+    /**
+     * Sets this menu item avtive oder inactive.
+     * 
+     * An item is considered 'active' when either the mouse is
+     * over the elment or it has an open submenu.
+     * @param {boolean} val 
+     */
     setActive(val) {
         if(val != this.active) {
             this.active = val;
@@ -48,8 +90,42 @@ class MenuItem extends EventEmitter {
         }
     }
 
+    /**
+     * Returns whether or not this menu item is enabled
+     */
+    isEnabled() {
+        return this.enabled;
+    }
+
+    /**
+     * Enables or diables this menu item
+     * @param {boolean} val 
+     */
+    setEnabled(val) {
+        if(val != this.enabled) {
+            this.enabled = val;
+            this.emitEvent('enabledchange', this, val);
+        }
+    }
+
+    /**
+     * Returns the unique id of this menu item
+     */
     getId() {
         return this.menuItemId;
+    }
+
+    /**
+     * Recursivle search this element and its children for a 
+     * MenuItem with the given id. Returns undefined if not found
+     * @param {string} id 
+     */
+    find(id) {
+        if(this.getId() == id) {
+            return this;
+        } else {
+            return this.getChildren().find((c) => c.find(id));
+        }
     }
 }
 
@@ -67,7 +143,7 @@ class MenuManager {
         fileMenu.addChild(new MenuItem('Exit'));
         this.menuRoot.addChild(fileMenu);
 
-        this.menuRoot.addChild(new MenuItem('Edit'));
+        this.menuRoot.addChild(new MenuItem('Edit', 'edit'));
 
         let zoomMenu = new MenuItem('Zoom');
         zoomMenu.addChild(new MenuItem('100%'));
@@ -87,8 +163,20 @@ class MenuManager {
         this.menuRoot.addChild(new MenuItem('Help'));
     }
 
+    /**
+     * Returns the root menu item
+     */
     getRoot() {
         return this.menuRoot;
+    }
+
+    /**
+     * Find a certain menu entry by its id.
+     * 
+     * @param {string} id Id of the menu item to find 
+     */
+    find(id) {
+        return this.menuRoot.find(id);
     }
 }
 
@@ -105,6 +193,10 @@ class MenuBar {
         root.addEventListener('removeChild', (_, c) => this.removeChild(c));
     }
 
+    /**
+     * Event handler for when a new menu bar item is added
+     * @param {MenuItem} child 
+     */
     addChild(child) {
         const el = document.createElement('div');
         el.innerText = child.getName();
@@ -147,6 +239,10 @@ class MenuBar {
         new Menu(child, el, ENUM_MENUPOSITION_BOTTOM);
     }
 
+    /**
+     * Event handler for when a menu bar item is removed
+     * @param {MenuItem} child 
+     */
     removeChild(child) {
         const el = this.elements[child.getId()];
         if(el) {
@@ -171,9 +267,10 @@ class Menu {
 
         this.childElements = {};
 
-        this.menuItem.addEventListener('activechange', (_, e) => this.menuItemActiveChange(e));
-        this.menuItem.addEventListener('addchild', (_, c) => this.addChild(c));
-        this.menuItem.addEventListener('removeChild', (_, c) => this.removeChild(c));
+        this.menuItem.addEventListener('activechange',  (_, e) => this.menuItemActiveChange(e));
+        this.menuItem.addEventListener('addchild',      (_, c) => this.addChild(c));
+        this.menuItem.addEventListener('removeChild',   (_, c) => this.removeChild(c));
+        this.menuItem.addEventListener('enabledchange', (_, e) => this.menuItemEnabledChange(e));
 
         // Handler that is triggered everytime a child item adds/removes a child item
         this.childSubMenuHandler = (c) => this.updateChildItemStyle(c);
@@ -181,14 +278,32 @@ class Menu {
         this.menuItem.getChildren().forEach((c) => this.addChild(c));
         // Initial active state
         this.menuItemActiveChange(this.menuItem.isActive());
+        // Initial enabled state
+        this.menuItemEnabledChange(this.menuItem.isEnabled());
     }
 
+    /**
+     * Event handler that gets triggered when the item becomes active or inactive
+     * @param {boolean} active 
+     */
     menuItemActiveChange(active) {
         // Only show the menu if the item actually has children
         if(active && this.menuItem.hasChildren()) {
             this.htmlElement.classList.add('active');
         } else {
             this.htmlElement.classList.remove('active');
+        }
+    }
+
+    /**
+     * Event handler that gets triggered when the item is enabled or disabled
+     * @param {boolean} enabled 
+     */
+    menuItemEnabledChange(enabled) {
+        if(!enabled && !this.htmlElement.classList.contains('disabled')) {
+            this.parentHtmlElement.classList.add('disabled');
+        } else if (enabled) {
+            this.parentHtmlElement.classList.remove('disabled');
         }
     }
 
@@ -225,6 +340,12 @@ class Menu {
         // Set event handlers
         el.onmouseover = () => child.setActive(true);
         el.onmouseout = () => child.setActive(false);
+        el.onclick = (e) => {
+            if(child.isEnabled()) {
+                child.emitEvent('click', child, e);
+            }
+        }
+
         // Save reference for later
         this.childElements[child.getId()] = el;
 

@@ -70,13 +70,15 @@
 
             const initApp = async function() {
 
+                // Setup base data classes and references
                 appManager = {
                     core: {
                         drawingArea: new DrawingArea(document.querySelector('.canvas-background')),
                         toolManager: new ToolManager(),
                         pluginLoader: new PluginLoader(),
                         colorManager: new ColorManager(),
-                        menuManager: new MenuManager()
+                        menuManager: new MenuManager(),
+                        historyManager: new HistoryManager()
                     },
 
                     util: {
@@ -84,6 +86,7 @@
                     }
                 }
 
+                // Setup basic ui elements
                 toolBar = new ToolBar(appManager.core.toolManager, 
                     document.querySelector('.toolbar'));
                 colorBar = new ColorBar(appManager.core.colorManager, 
@@ -94,10 +97,12 @@
                 menuBar = new MenuBar(appManager.core.menuManager, 
                     document.querySelector('.menu-bar-container'));
                 
+                // Load all the plugins
                 await Promise.all([
                     appManager.core.pluginLoader.loadPlugin('PaintBrush'),
                     appManager.core.pluginLoader.loadPlugin('PaintLine'),
-                    appManager.core.pluginLoader.loadPlugin('ZoomControls')
+                    appManager.core.pluginLoader.loadPlugin('ZoomControls'),
+                    appManager.core.pluginLoader.loadPlugin('HistoryControls')
                 ]);
             };
 

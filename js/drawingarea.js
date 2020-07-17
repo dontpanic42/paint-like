@@ -85,11 +85,7 @@ class DrawingCanvas extends EventEmitter {
         this.canvasMouseMoveHandler = (e) => {
 
             const coords = this.clientCoordToCanvasCoords({x: e.clientX, y: e.clientY});
-            const event = {
-                canvasX: coords.x,
-                canvasY: coords.y,
-                originalEvent: e
-            };
+            const event = { canvasX: coords.x, canvasY: coords.y, originalEvent: e };
 
             this.emitEvent('mousemove', event);
         };
@@ -99,11 +95,7 @@ class DrawingCanvas extends EventEmitter {
             document.removeEventListener('mouseup', this.canvasMouseUpHandler);
 
             const coords = this.clientCoordToCanvasCoords({x: e.clientX, y: e.clientY});
-            const event = {
-                canvasX: coords.x,
-                canvasY: coords.y,
-                originalEvent: e
-            };
+            const event = { canvasX: coords.x, canvasY: coords.y, originalEvent: e };
 
             this.emitEvent('mouseup', event);
         };
@@ -113,11 +105,7 @@ class DrawingCanvas extends EventEmitter {
             document.addEventListener('mouseup', this.canvasMouseUpHandler, false);
 
             const coords = this.clientCoordToCanvasCoords({x: e.clientX, y: e.clientY});
-            const event = {
-                canvasX: coords.x,
-                canvasY: coords.y,
-                originalEvent: e
-            };
+            const event = { canvasX: coords.x, canvasY: coords.y, originalEvent: e };
 
             this.emitEvent('mousedown', event);
         };

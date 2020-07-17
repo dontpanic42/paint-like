@@ -40,6 +40,11 @@
     flex: 1;
 }
 
+/* Menu item is disabled */
+.menu-bar-container .menu-item.disabled .menu-title {
+    color: gray;
+}
+
 /* Submenu arrow default */
 .menu-bar-container .menu-item > .menu-submenu-arrow {
     display: none;
@@ -96,7 +101,7 @@
     padding: 0 20px;
 }
 
-.menu-bar-container .menu.active .menu-item:hover {
+.menu-bar-container .menu.active .menu-item:not(.disabled):hover {
     background-color: var(--pcolor-menu-item-active);
     color: var(--pcolor-menu-item-active-fontcolor);
 }

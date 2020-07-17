@@ -1,8 +1,12 @@
 class PaintBrushTool extends Tool {
-    constructor(canvas, color, algoLib) {
+    constructor(appManager) {
         super();
 
-        this.canvas = canvas;
+        const appCore = appManager.core;
+        const canvas = this.canvas = appCore.drawingArea.canvas;
+        const color = appCore.colorManager;
+        const history = appCore.historyManager;
+        const algoLib = appManager.util.algoLib;
 
         const lineWidth = 1;
         const previousPoint = {x: 0, y: 0};
@@ -22,7 +26,25 @@ class PaintBrushTool extends Tool {
         };
 
         this.mouseUpEventHandler = () => {
+            const ctx = this.canvas.context;
+            const cvs = ctx.canvas;
+
+            // Save 'before' state for history
+            const previousImageData = ctx.getImageData(0, 0, cvs.width, cvs.height);
+
             this.canvas.applyPreview();
+
+            // Save 'after' state for history
+            const currentImageData = ctx.getImageData(0, 0, cvs.width, cvs.height);
+
+            // Construct undo/redo actions
+            const historyItem = new HistoryItem(
+                `Paint with ${this.getName()}`, 
+                () => ctx.putImageData(previousImageData, 0, 0),
+                () => ctx.putImageData(currentImageData, 0, 0));
+
+            // Push them to the current history
+            history.push(historyItem);
         };
 
         this.mouseMoveEventHandler = (e) => {
@@ -82,11 +104,8 @@ class PaintBrush extends Plugin {
 
     init() {
         const appCore = this.getAppManager().core;
-        const canvas = appCore.drawingArea.canvas;
-        const color = appCore.colorManager;
-        const algoLib = this.getAppManager().util.algoLib;
 
-        appCore.toolManager.addTool(new PaintBrushTool(canvas, color, algoLib));
+        appCore.toolManager.addTool(new PaintBrushTool(this.getAppManager()));
     }
 }
 

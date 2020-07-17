@@ -1,3 +1,4 @@
+
 class ColorManager extends EventEmitter {
     constructor() {
         super(false);
@@ -24,41 +25,74 @@ class ColorManager extends EventEmitter {
         this.selectedBackgroundColor = 14;
     }
 
+    /**
+     * Returns the current foreground color as css rgb string
+     */
     getForegroundColor() {
         return this.getPaletteColorAsString(this.selectedForegroundColor);
     }
 
+    /**
+     * Returns the current foreground color as an array of r, g and b values
+     */
     getForegroundColorAsRgb() {
         return this.palette[this.selectedForegroundColor];
     }
 
+    /**
+     * Returns the current background color as css rgb string
+     */
     getBackgroundColor() {
         return this.getPaletteColorAsString(this.selectedBackgroundColor);
     }
 
+    /**
+     * Returns the current background color as an array of r, g and b values
+     */
     getBackgroundColorAsRgb() {
         return this.palette[this.selectedBackgroundColor];
     }
 
+    /**
+     * Sets the current foreground color
+     * @param {int} index Palette index of the color
+     */
     setForegroundColor(index) {
         this.selectedForegroundColor = index;
         this.emitEvent('setforegroundcolor', index, this.palette[index], this.getPaletteColorAsString(index));
     }
 
+    /**
+     * Sets the current background color
+     * @param {int} index Palette index of the color
+     */
     setBackgroundColor(index) {
         this.selectedBackgroundColor = index;
         this.emitEvent('setbackgroundcolor', index, this.palette[index], this.getPaletteColorAsString(index));
     }
 
+    /**
+     * Sets a color of the palette as r, g and b values
+     * @param {int} index Index of the color to modify
+     * @param {Array} rgb array of r, g and b values
+     */
     setPaletteColor(index, rgb) {
         this.palette[index] = rgb;
         this.emitEvent('paletteupdate', index, rgb, this.getPaletteColorAsString(index));
     }
 
+    /**
+     * Returns a color of the palette as array of r, g and b values
+     * @param {int} index Index of the color to return
+     */
     getPaletteColor(index) {
         return this.palette[index];
     }
 
+    /**
+     * Returns a color of the palette as css rgb string
+     * @param {int} index Index of the color to return
+     */
     getPaletteColorAsString(index) {
         return `rgba(${this.palette[index][0]}, ${this.palette[index][1]}, ${this.palette[index][2]}, 1.0)`;
     }
@@ -76,6 +110,10 @@ class ColorBar {
         this.colorManager.palette.forEach((_, index) => this.addColor(index));
     }
 
+    /**
+     * Adds a color to the color bar
+     * @param {int} index 
+     */
     addColor(index) {
         const parent = (index % 2 == 0)? this.htmlElementTop : this.htmlElementBottom;
 
@@ -101,6 +139,9 @@ class ColorPreview {
         this.updatePreview();
     }
 
+    /**
+     * Updates the preview to the current foreground and background colors
+     */
     updatePreview() {
         this.htmlElementFg.style.backgroundColor = this.colorManager.getForegroundColor();
         this.htmlElementBg.style.backgroundColor = this.colorManager.getBackgroundColor();
