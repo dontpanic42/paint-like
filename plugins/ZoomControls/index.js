@@ -7,9 +7,9 @@ class ZoomControlsTool extends Tool {
 
         this.zoomLevels = [
             1.0,
-            1.25,
-            1.5,
-            1.75
+            2.0,
+            4.0,
+            8.0
         ];
 
         this.currentZoomLevel = 0;

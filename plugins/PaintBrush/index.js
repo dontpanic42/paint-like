@@ -11,6 +11,8 @@ class PaintBrushTool extends Tool {
             previousPoint.x = e.canvasX | 0;
             previousPoint.y = e.canvasY | 0;
             
+            console.log('color', color.getForegroundColorAsRgb());
+
             algoLib.putPixel(
                 canvas.previewContext, 
                 previousPoint.x, 

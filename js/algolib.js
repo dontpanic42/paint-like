@@ -4,7 +4,7 @@
 
 class AlgoLib {
     putPixel(ctx, x0, y0, width, color) {
-        ctx.strokeStyle = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
+        ctx.fillStyle = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
         ctx.fillRect(x0, y0, width, width);
     }
 
