@@ -14,8 +14,6 @@ class PaintBrushTool extends Tool {
         this.mouseDownEventHandler = (e) => {
             previousPoint.x = e.canvasX | 0;
             previousPoint.y = e.canvasY | 0;
-            
-            console.log('color', color.getForegroundColorAsRgb());
 
             algoLib.putPixel(
                 canvas.previewContext, 
