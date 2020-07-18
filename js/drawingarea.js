@@ -47,17 +47,14 @@ class DrawingArea extends EventEmitter {
      * @param {Boolean} final (optional) Flag that indicates if this resize is part of an ongoing drag operation 
      */
     setSize (width, height, final = false) {
-        this.htmlElement.style.width = `${(width * this.scale.x) | 0}px`;
+        this.htmlElement.style.width =  `${(width * this.scale.x) | 0}px`;
         this.htmlElement.style.height = `${(height * this.scale.y) | 0}px`;
 
         this.size.x = width;
         this.size.y = height;
 
-        if (final) {
-            this.emitEvent('sizeupdateend', {width: width, height: height}); 
-        } else {
-            this.emitEvent('sizeupdate', {width: width, height: height}); 
-        }
+        const eventType = final ? 'sizeupdateend' : 'sizeupdate';
+        this.emitEvent(eventType, {width: width, height: height});
     }
 
     /**
@@ -72,7 +69,6 @@ class DrawingArea extends EventEmitter {
         this.scale.y = y;
 
         this.setSize(this.size.x, this.size.y, true);
-
         this.emitEvent('scaleupdate', this.scale);
     }
 
@@ -104,70 +100,89 @@ class DrawingCanvas extends EventEmitter {
         super();
 
         this.drawingArea = drawingArea;
-        this.cvs = [ 
+        this.canvas = { 
             // Element for buffer 1
-            document.createElement('canvas'),
-            // Element for buffer 2  
-            document.createElement('canvas'),
+            main: document.createElement('canvas'),
             // Preview canvas 
-            document.createElement('canvas') 
-        ];
+            preview: document.createElement('canvas') 
+        };
 
-        this.active = 0;
-        this.inactive = 1;
-        this.preview = 2;
+        // Important: We need to ensure the preview is above the main in
+        // the stack, so first add main, then preview
+        this.drawingArea.htmlElement.appendChild(this.canvas.main);
+        this.drawingArea.htmlElement.appendChild(this.canvas.preview);
 
-        this.drawingArea.htmlElement.appendChild(this.cvs[this.active]);
-        this.drawingArea.htmlElement.appendChild(this.cvs[this.preview]);
-
-        this.setRawCanvasSize(this.active, this.drawingArea.getSize());
-        this.setRawCanvasSize(this.preview, this.drawingArea.getSize());
+        // Set initial size of the canvases
+        this.setRawCanvasSize(this.drawingArea.getSize());
 
         this.drawingArea.addEventListener('sizeupdateend', (s) => this.setSize(s));
         this.drawingArea.addEventListener('scaleupdate', () => this.setSize());
 
-        this.canvasMouseMoveHandler = (e) => {
-
-            const coords = this.clientCoordToCanvasCoords({x: e.clientX, y: e.clientY});
-            const event = { canvasX: coords.x, canvasY: coords.y, originalEvent: e };
-
-            this.emitEvent('mousemove', event);
-        };
-
-        this.canvasMouseUpHandler = (e) => {
-            document.removeEventListener('mousemove', this.canvasMouseMoveHandler);
-            document.removeEventListener('mouseup', this.canvasMouseUpHandler);
-
-            const coords = this.clientCoordToCanvasCoords({x: e.clientX, y: e.clientY});
-            const event = { canvasX: coords.x, canvasY: coords.y, originalEvent: e };
-
-            this.emitEvent('mouseup', event);
-        };
-
-        this.canvasMouseDownHandler = (e) => {
-            document.addEventListener('mousemove', this.canvasMouseMoveHandler, false);
-            document.addEventListener('mouseup', this.canvasMouseUpHandler, false);
-
-            const coords = this.clientCoordToCanvasCoords({x: e.clientX, y: e.clientY});
-            const event = { canvasX: coords.x, canvasY: coords.y, originalEvent: e };
-
-            this.emitEvent('mousedown', event);
-        };
-
-        this.cvs.forEach((e) => e.addEventListener('mousedown', this.canvasMouseDownHandler, false));
+        // Setup mouse event handlers on the preview canvas
+        this.setupPreviewMouseEventHandlers();
     }
 
     /**
-     * Method that maps client coordinates (eg. from a mouse event) to canvas coordinates,
-     * including scale, scroll etc.
-     * @param {{x: Number, y: Number}} coords 
+     * Sets up canvas event handlers. These are to be used by the drawing tools
+     * to get a) normal mouse events and b) to get the events including
+     * ready-made translated mouse coordinates
      */
-    clientCoordToCanvasCoords(coords) {
-        const rect = this.htmlElement.getBoundingClientRect();
-        return {
-            x: (coords.x - rect.left) / this.drawingArea.scale.x,
-            y: (coords.y - rect.top) / this.drawingArea.scale.y
+    setupPreviewMouseEventHandlers() {
+
+        /**
+         * Wraps a MouseEvent object in another object, adding translated canvas 
+         * coordinates to be used by drawing tools
+         * @param {MouseEvent} originalEvent 
+         */
+        const wrapMouseEvent = (originalEvent) => {
+            // Get coordinates of the canvas relative to client
+            const {left, top} =    this.htmlElement.getBoundingClientRect();
+            // Get the scale we are working on
+            const {x: sx, y: sy} = this.drawingArea.getScale();
+
+            return { 
+                // Translate x coordinate of the mouse event to canvas coordinate system
+                canvasX: (originalEvent.clientX - left) / sx, 
+                // Translate y coordinate of the mouse event to canvas coordinate system
+                canvasY: (originalEvent.clientY - top) / sy, 
+                // Also pass the original event in case the tool needs it
+                originalEvent 
+            };
         }
+
+        /**
+         * Mouse move event handler
+         * @param {MouseEvent} e 
+         */
+        const canvasMouseMoveHandler = (e) => {
+            // Emit the wrapped mouse event
+            this.emitEvent('mousemove', wrapMouseEvent(e));
+        };
+
+        /**
+         * Mouse up event handler
+         * @param {MouseEvent} e 
+         */
+        const canvasMouseUpHandler = (e) => {
+            // Remove all the document event handlers since we are not interested
+            // in mouse events that did not originate on our canvas
+            document.removeEventListener('mousemove', canvasMouseMoveHandler);
+            document.removeEventListener('mouseup', canvasMouseUpHandler);
+            // Emit the wrapped mouse event
+            this.emitEvent('mouseup', wrapMouseEvent(e));
+        };
+
+        // Set up canvas event handler. Since the tools are only expected to ever
+        // interact with the preview canvas, that's where we put the event handlers
+        this.canvas.preview.addEventListener('mousedown', (e) => {
+            // We need to hook the document event handlers in case the user leaves
+            // the canvas with the mouse. In that case, we still want to get
+            // updates on the ongoing mouse action
+            document.addEventListener('mousemove', canvasMouseMoveHandler, false);
+            document.addEventListener('mouseup', canvasMouseUpHandler, false);
+            // Emit the wrapped mouse event
+            this.emitEvent('mousedown', wrapMouseEvent(e));
+        }, false);
     }
 
     /**
@@ -175,9 +190,9 @@ class DrawingCanvas extends EventEmitter {
      * @param {{width: Number, height: Number}} size 
      */
     setSize(size = null) {
-        this.setRawCanvasSize(this.inactive, size);
-        this.setRawCanvasSize(this.preview, size);
-        this.swapActive();
+        const data = this.context.getImageData(0, 0, this.canvas.main.width, this.canvas.main.height);
+        this.setRawCanvasSize(size);
+        this.context.putImageData(data, 0, 0);
     }
 
     /**
@@ -188,47 +203,19 @@ class DrawingCanvas extends EventEmitter {
      * @param {{width: Number, height: Number}} size 
      * @param {{x: Number, y: Number}} scale 
      */
-    setRawCanvasSize(index, size = null, scale = null) {
-        if (!size) {
-            size = this.drawingArea.getSize();
-        }
+    setRawCanvasSize(size = null, scale = null) {
+        const {width, height}   = size  || this.drawingArea.getSize();
+        const {x, y}            = scale || this.drawingArea.getScale();
 
-        if (!scale) {
-            scale = this.drawingArea.getScale();
-        }
+        const m = this.canvas.main;
+        const p = this.canvas.preview;
 
-        this.cvs[index].width = size.width | 0;
-        this.cvs[index].height = size.height | 0;
-        this.cvs[index].style.width = size.width * scale.x | 0;
-        this.cvs[index].style.height = size.height * scale.y | 0;
-    }
-
-    /**
-     * Copy the currently active canvas to the currently inavtive and then 
-     * make the inavtive the active canvas (buffer swap)
-     */
-    swapActive() {
-        this.copyActiveToInactive();
-
-        const oldActive = this.active;
-        this.active = this.inactive;
-        this.inactive = oldActive;
-
-        // The preview area always has to be on top, so make sure that we add
-        // the new active area *below* the preview
-        this.drawingArea.htmlElement.replaceChild(
-            this.cvs[this.active],          // to be added
-            this.cvs[this.inactive]);       // to be removed
-    }
-
-    /**
-     * Copies the active canvas content to the inavtive canvas
-     */
-    copyActiveToInactive() {
-        const active = this.cvs[this.active];
-        const inactive = this.cvs[this.inactive];
-        // Copy image data
-        inactive.getContext('2d').drawImage(active, 0, 0);
+        // Set the inner size (resolution) of the canvas
+        m.width  = p.width  = width  | 0;
+        m.height = p.height = height | 0;
+        // Set the outer size of the canvas (res*scale)
+        m.style.width  = p.style.width  = (width * x)  | 0;
+        m.style.height = p.style.height = (height * y) | 0;
     }
 
     /**
@@ -236,8 +223,7 @@ class DrawingCanvas extends EventEmitter {
      * clear the preview canvas
      */
     applyPreview() {
-        const preview = this.cvs[this.preview];
-        this.context.drawImage(preview, 0, 0);
+        this.context.drawImage(this.canvas.preview, 0, 0);
         this.clearPreview();
     }
 
@@ -245,15 +231,16 @@ class DrawingCanvas extends EventEmitter {
      * Clear the preview canvas
      */
     clearPreview() {
-        const preview = this.cvs[this.preview];
-        preview.getContext('2d').clearRect(0, 0, preview.width, preview.height);
+        this.previewContext.clearRect(0, 0, 
+            this.canvas.preview.width, 
+            this.canvas.preview.height);
     }
 
     /**
      * The html element for the currently active canvas
      */
     get htmlElement() {
-        return this.cvs[this.active];
+        return this.canvas.main;
     }
 
     /**
@@ -263,14 +250,14 @@ class DrawingCanvas extends EventEmitter {
      * composite using applyPreview()
      */
     get context() {
-        return this.cvs[this.active].getContext('2d');
+        return this.canvas.main.getContext('2d');
     }
 
     /**
      * The 2d drawing context of the preview canvas
      */
     get previewContext() {
-        return this.cvs[this.preview].getContext('2d');
+        return this.canvas.preview.getContext('2d');
     }
 }
 
@@ -279,41 +266,46 @@ class DrawingCanvas extends EventEmitter {
  */
 class DrawingAreaResizer {
     constructor(drawingArea, resizerType, htmlElement) {
-        this.drawingArea = drawingArea;
-        this.resizerType = resizerType;
-        this.htmlElement = htmlElement;
 
-        const mouseUpEventHandler = (e) => {
-            document.removeEventListener('mousemove', mouseMoveEventHandler);
-            document.removeEventListener('mouseup', mouseUpEventHandler);
+        // Holds the original mouse position at the start of the drag action
+        const originalMousePos = {x: 0, y: 0};
+        // Holds the original size at the start of the drag action
+        let originalSize = undefined;
 
-            const deltaWidth = (this.resizerType & ENUM_DIR_HORIZONTAL) ? e.clientX - this.originalMousePos.x : 0;
-            const deltaHeight = (this.resizerType & ENUM_DIR_VERTICAL) ? e.clientY - this.originalMousePos.y : 0;
+        /**
+         * Takes a mouse event and updates the size of the drawing area based on this event
+         * @param {MouseEvent} e The event based on which to calculate the size
+         * @param {Boolean} final (optional) Flag that indicates that this is the final event
+         */
+        const updateSizeFromMouseEvent = (e, final = false) => {
+            const deltaWidth = (resizerType & ENUM_DIR_HORIZONTAL) ? e.clientX - originalMousePos.x : 0;
+            const deltaHeight = (resizerType & ENUM_DIR_VERTICAL) ? e.clientY - originalMousePos.y : 0;
 
-            this.drawingArea.setSize(
-                (this.originalSize.width + deltaWidth) / drawingArea.scale.x, 
-                (this.originalSize.height + deltaHeight) / drawingArea.scale.y,
-                true
+            drawingArea.setSize(
+                (originalSize.width + deltaWidth) / drawingArea.scale.x, 
+                (originalSize.height + deltaHeight) / drawingArea.scale.y,
+                final
             );
-        };
+        }
 
-        const mouseMoveEventHandler = (e) => {
-            const deltaWidth = (this.resizerType & ENUM_DIR_HORIZONTAL) ? e.clientX - this.originalMousePos.x : 0;
-            const deltaHeight = (this.resizerType & ENUM_DIR_VERTICAL) ? e.clientY - this.originalMousePos.y : 0;
-            
-            this.drawingArea.setSize(
-                (this.originalSize.width + deltaWidth) / drawingArea.scale.x,
-                (this.originalSize.height + deltaHeight) / drawingArea.scale.y,
-                false
-            );
+        /**
+         * Takes a mouse event and updates the size of the drawing area based on this event. Removes all related
+         * mouse event handlers from the document
+         * @param {MouseEvent} e 
+         */
+        const removeHandlerAndUpdateSizeFromMouseEvent = (e) => {
+            document.removeEventListener('mousemove', updateSizeFromMouseEvent);
+            document.removeEventListener('mouseup', removeHandlerAndUpdateSizeFromMouseEvent);
+            updateSizeFromMouseEvent(e, true);
         };
 
         htmlElement.onmousedown = (e) => {
-            this.originalSize = this.drawingArea.getSize();
-            this.originalMousePos = {x: e.clientX, y: e.clientY};
+            originalSize = drawingArea.getSize();
+            originalMousePos.x = e.clientX
+            originalMousePos.y = e.clientY;
 
-            document.addEventListener('mousemove', mouseMoveEventHandler, false);
-            document.addEventListener('mouseup', mouseUpEventHandler, false);
+            document.addEventListener('mousemove', updateSizeFromMouseEvent, false);
+            document.addEventListener('mouseup', removeHandlerAndUpdateSizeFromMouseEvent, false);
         };
     }
 };
