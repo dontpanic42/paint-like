@@ -48,7 +48,7 @@ HotKeyModifier.META =   new HotKeyModifier('Meta', 4, (e) => e.metaKey);
  */
 class HotKey extends EventEmitter {
     constructor(...args) {
-        super(true);
+        super();
 
         this.enabled = false;
         this.mods = [];

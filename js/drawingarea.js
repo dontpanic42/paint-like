@@ -288,8 +288,8 @@ class DrawingAreaResizer {
             const deltaHeight = (this.resizerType & ENUM_DIR_VERTICAL) ? e.clientY - this.originalMousePos.y : 0;
 
             this.drawingArea.setSize(
-                this.originalSize.width + deltaWidth, 
-                this.originalSize.height + deltaHeight,
+                (this.originalSize.width + deltaWidth) / drawingArea.scale.x, 
+                (this.originalSize.height + deltaHeight) / drawingArea.scale.y,
                 true
             );
         };
@@ -299,8 +299,8 @@ class DrawingAreaResizer {
             const deltaHeight = (this.resizerType & ENUM_DIR_VERTICAL) ? e.clientY - this.originalMousePos.y : 0;
             
             this.drawingArea.setSize(
-                this.originalSize.width + deltaWidth,
-                this.originalSize.height + deltaHeight,
+                (this.originalSize.width + deltaWidth) / drawingArea.scale.x,
+                (this.originalSize.height + deltaHeight) / drawingArea.scale.y,
                 false
             );
         };
