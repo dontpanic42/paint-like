@@ -1,4 +1,48 @@
+/**
+ * A selection of functions that are usefull for working with raw image data
+ */
+const AlgoLibImageDataHelper = {
 
+    /**
+     * Returns the color of a given pixel in given image data
+     * @param {ImageData} data The image data to get the value from
+     * @param {Number} x
+     * @param {Number} y
+     */
+    getColor: (data, x, y) => {
+        const offset = (y * data.width + x) << 2;
+        return [
+            data.data[offset], 
+            data.data[offset+1], 
+            data.data[offset+2]
+        ];
+    },
+
+    /**
+     * Set color of a given pixel in given image data
+     * @param {ImageData} data The image data to work on
+     * @param {Number} x
+     * @param {Number} y
+     * @param {Array} color The color to set the pixel to
+     */
+    setColor: (data, x, y, [r, g, b]) => {
+        const offset = (y * data.width + x) << 2;
+        data.data[offset  ] = r;
+        data.data[offset+1] = g;
+        data.data[offset+2] = b;
+        data.data[offset+3] = 255;
+    },
+
+    /**
+     * Returns whether or not two give arrays containing r,g and b values
+     * are equal
+     * @param {Array} a Color 1
+     * @param {Array} b Color 2
+     */
+    colorIsEqual: (a, b) => {
+        return a[0] == b[0] && a[1] == b[1] && a[2] == b[2];
+    }
+}
 
 /**
  * Class that contains shared drawing algorithms.
@@ -17,9 +61,85 @@ class AlgoLib {
      * @param {Number} width Size of the pixel to draw
      * @param {Array} color Color of the pixel to draw
      */
-    putPixel(ctx, x0, y0, width, [r, g, b]) {
-        ctx.fillStyle = `rgb(${r}, ${g}, ${b})`;
-        ctx.fillRect(x0, y0, width, width);
+    putPixel(ctx, x0, y0, width, color) {
+        const {setColor} = AlgoLibImageDataHelper;
+        const data = ctx.getImageData(x0, y0, width, width);
+
+        for(let x = 0; x < width; x++) {
+            for(let y = 0; y < width; y++) {
+                setColor(data, x, y, color)
+            }
+        }
+
+        ctx.putImageData(data, x0, y0);
+    }
+
+    /**
+     * Does flood fill on a given context, based on the existing data in a reference context
+     * @param {CanvasRenderingContext2D} ctxTag Context of the canvas to render to 
+     * @param {CanvasRenderingContext2D} ctxRef Context of the canvas used as fill reference
+     * @param {*} x0 Left coordinate  
+     * @param {*} y0 Top coordinate
+     * @param {Array} color Color as RGB array 
+     */
+    floodFill(ctxTag, ctxRef, x0, y0, color) {
+        // Import some helpers that make it easier to work with raw image data
+        const {setColor, getColor, colorIsEqual} = AlgoLibImageDataHelper;
+        // Get the dimensions of the canvas
+        const {width, height} = ctxRef.canvas;
+
+        if(width > 0xFFFF || height > 0xFFFF) {
+            console.warn(`[AlgoLib]: Image size exceeds ${0xFFFF}x${0xFFFF}px, cannot completely fill`);
+        }
+
+        // Get the raw image data from the reference. This creates a copy, so we
+        // can override it later without worrying about modifying the original
+        const data = ctxRef.getImageData(0, 0, width, height)
+        // Get the reference color, ie. the color of the pixel we stared with
+        const refColor = getColor(data, x0, y0);
+        // If the pixel we started with already has the same color as the fill color...
+        if(colorIsEqual(refColor, color)) {
+            // ... return immediately
+            return;
+        }
+
+        // Prepare the stack. We knowingly overprovision... oh well , better than
+        // having to allocated later
+        const stack = new Array(width * height * 2);
+        // First entry on the stack: The starting coordinates. To save on memory/
+        // stack operations, we pack the corrdinates in a 32 bit field, with the upper
+        // 16 bit being y, the lower 16 bit x
+        stack[0] = x0 + (y0 << 16);
+
+        // We loop over the stack until the stack pointer is < 0
+        for(let sp = 0; sp >= 0;) {
+            // x value is the lower 16bit. And'ing with 0xFFFF ensures a positive value
+            const x = stack[sp  ] & 0xFFFF;
+            // y value is the upper 16bit. And'ing with 0xFFFF ensures a positive value
+            const y = stack[sp--] >> 16 & 0xFFFF;
+
+            // Check if out of range. No gegative check required since we And with 0xFFFF before
+            if(x >= width || y >= height) {
+                // Out of range, ignore value
+                continue;
+            }
+
+            // Only proceed if the current pxiels color is the same as the one we started with
+            // (our reference color)
+            if(colorIsEqual(refColor, getColor(data, x, y))) {
+
+                // Colorize the pixel with the fill color
+                setColor(data, x, y, color);
+                // Add all surrounding pixels to the list
+                stack[++sp] = (x + 1) + ((y) << 16);
+                stack[++sp] = (x - 1) + ((y) << 16);
+                stack[++sp] = x + ((y + 1) << 16);
+                stack[++sp] = x + ((y - 1) << 16);
+            }
+        }
+
+        // Copy the reference data we were working with to the target context
+        ctxTag.putImageData(data, 0, 0);
     }
 
     /**

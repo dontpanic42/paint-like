@@ -274,6 +274,39 @@ class HistoryItem {
     }
 }
 
+class HistoryHelper {
+    constructor(history) {
+        this.history = history;
+    }
+
+    /**
+     * Wrapper for DrawingCanvas.applyPreview that automatically adds an entry
+     * to the current history
+     * @param {DrawingCanvas} canvas Canvas to apply preview on 
+     */
+    historizedApplyPreview(canvas, description, ...args) {
+        const ctx = canvas.context;
+        const cvs = ctx.canvas;
+
+        // Save 'before' state for history
+        const previousImageData = ctx.getImageData(0, 0, cvs.width, cvs.height);
+
+        canvas.applyPreview(...args);
+
+        // Save 'after' state for history
+        const currentImageData = ctx.getImageData(0, 0, cvs.width, cvs.height);
+
+        // Construct undo/redo actions
+        const historyItem = new HistoryItem(
+            description, 
+            () => ctx.putImageData(previousImageData, 0, 0),
+            () => ctx.putImageData(currentImageData, 0, 0));
+
+        // Push them to the current history
+        this.history.push(historyItem);
+    }
+}
+
 /**
  * Class that manages a history stack, including undo, repeat etc.
  * 
@@ -287,6 +320,8 @@ class HistoryManager extends EventEmitter {
         this.historySize = 3;
         this.historyPointer = -1;
         this.history = [];
+
+        this.helper = new HistoryHelper(this);
     }
 
     /**
