@@ -94,7 +94,8 @@ class ColorManager extends EventEmitter {
      * @param {int} index Index of the color to return
      */
     getPaletteColorAsString(index) {
-        return `rgba(${this.palette[index][0]}, ${this.palette[index][1]}, ${this.palette[index][2]}, 1.0)`;
+        const [r, g, b] = this.palette[index];
+        return `rgba(${r}, ${g}, ${b}, 1.0)`;
     }
 }
 

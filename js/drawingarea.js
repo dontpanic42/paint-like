@@ -186,12 +186,18 @@ class DrawingCanvas extends EventEmitter {
     }
 
     /**
-     * Set all canvases to a new logical size
-     * @param {{width: Number, height: Number}} size 
+     * Set all canvases to a new logical size.
+     * If the size is omitted, a refresh is done with current values, e.g. to update
+     * everything after scale changes
+     * @param {{width: Number, height: Number}} size (optional) the size to set to.
      */
     setSize(size = null) {
+        // Create an in-memory copy of the current man canvas content
+        // We don't really need this for the preview since it's ephemeral anyways
         const data = this.context.getImageData(0, 0, this.canvas.main.width, this.canvas.main.height);
+        // Update the actual size of the thing
         this.setRawCanvasSize(size);
+        // Restore the content from the image data we saved earlier
         this.context.putImageData(data, 0, 0);
     }
 

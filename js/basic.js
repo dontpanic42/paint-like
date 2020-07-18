@@ -16,45 +16,81 @@ class EventEmitter {
     }
 
     /**
-     * Register a new event listener for a given event
-     * @param {string} eventType 
+     * Prints a debug message whenever debug mode is enabled
+     * @param  {...any} args Parameters passed to console.log
+     */
+    eventEmitterDebugPrint(...args) {
+        if(this.eventEmitterDebugMode) {
+            console.log('[EventEmitter]:', ...args);
+        }
+    }
+
+    /**
+     * Register a new event listener for a given event.
+     * Should the eventType be an array, the event listener is registered for all 
+     * events specified in the array.
+     * @param {string|Array} eventType Event name or array of event names 
      * @param {function} listener 
      */
     addEventListener(eventType, listener) {
-        eventType = eventType.toLowerCase().trim();
-
-        if(this.eventEmitterDebugMode) {
-            console.log(`[EventEmitter Debug]: Adding event listener for "${eventType}"`, listener);
+        // Check if eventType is an array
+        if(eventType instanceof Array) {
+            // If it is an array, call this method for each of the elements in the array and return
+            return eventType.forEach((e) => this.addEventListener(e, listener));
         }
 
+        // Ensure that the event type is lower case
+        eventType = eventType.toLowerCase().trim();
+
+        // Print debug message 
+        this.eventEmitterDebugPrint(`Adding event listener for "${eventType}"`, listener);
+
+        // Check if the event handler array already exists for this event
         if(typeof(this.eventEmitterEventDict[eventType]) === 'undefined') {
+            // If not, create it
             this.eventEmitterEventDict[eventType] = [];
         }
 
+        // Check if the event listener is already registered
         if(this.eventEmitterEventDict[eventType].indexOf(listener) != -1) {
-            throw new Error(`Event listener already exists for event "${eventType}"`);
+            // If it is, throw an error. This should not happen
+            throw new Error(`[EventEmitter]: Event listener already exists for event "${eventType}"`);
         }
 
+        // Register the event listener
         this.eventEmitterEventDict[eventType].push(listener);
     }
 
     /**
-     * Removes a given event listener from a given event
-     * @param {string} eventType 
+     * Removes a given event listener from a given event.
+     * Should the eventType be an array, the event listener is removed for all 
+     * events specified in the array.
+     * @param {string|Array} eventType Event name or array of event names
      * @param {function} listener 
      */
     removeEventListener(eventType, listener) {
-        eventType = eventType.toLowerCase().trim();
-
-        if(this.eventEmitterDebugMode) {
-            console.log(`[EventEmitter Debug]: Removing event listener for "${eventType}"`, listener);
+        // Check if eventType is an array
+        if(eventType instanceof Array) {
+            // If it is an array, call this method for each of the elements in the array and return
+            return eventType.forEach((e) => this.removeEventListener(e, listener));
         }
 
+        // Ensure that the event type is lower case
+        eventType = eventType.toLowerCase().trim();
+
+        // Print debug message 
+        this.eventEmitterDebugPrint(`Removing event listener for "${eventType}"`, listener);
+
+        // Get a list of listeners for the current event
         const listeners = this.eventEmitterEventDict[eventType] || [];
+        // Get the index of the current listener in the event emitter dict
         const listenerIndex = listeners.indexOf(listener);
+
         if(listenerIndex == -1) {
-            console.warn(`Warning: Attempt to remove listener for event "${eventType}", but no listener defined for event`);
+            // If the listener does not exist, show a warning. This does not hurt, but it indicates that something is wrong
+            console.warn(`[EventEmitter]: Warning: Attempt to remove listener for event "${eventType}", but no listener defined for event`);
         } else {
+            // Remove the listener from the event handlers list
             listeners.splice(listenerIndex, 1);
         }
     }
@@ -62,20 +98,19 @@ class EventEmitter {
     /**
      * Triggers all event listeners for a given event with the given arguments
      * @param {string} eventType 
-     * @param  {...any} eventDataArgs 
+     * @param  {...any} eventDataArgs Data passed to event handlers
      */
     emitEvent(eventType, ...eventDataArgs) {
         eventType = eventType.toLowerCase().trim();
 
-        if(this.eventEmitterDebugMode) {
-            console.log(`[EventEmitter Debug]: Triggering event "${eventType}"`, eventDataArgs);
-        }
+        // Print debug message 
+        this.eventEmitterDebugPrint(`Triggering event "${eventType}"`, eventDataArgs);
 
         (this.eventEmitterEventDict[eventType] || []).forEach((listener) => {
             try {
                 listener(...eventDataArgs);
             } catch(e) {
-                console.warn(`Error while executing listener for "${eventType}"`, e);
+                console.warn(`[EventEmitter]: Error while executing listener for "${eventType}"`, e);
             }
         });
     }
@@ -187,13 +222,10 @@ class PluginLoader {
     }
 }
 
-/******************************************************************************
- * History Management Classes
- * 
- * - HistoryItem: Item that represents one distinct entry in the history
- * - HistoryManager: Manager class for the apps history
- *****************************************************************************/
-
+/**
+ * Obect that represents one discrete step in the 
+ * current history
+ */
 class HistoryItem {
     constructor(description, undoCallback, repeatCallback) {
         this.description = description;
@@ -201,6 +233,10 @@ class HistoryItem {
         this.repeatCallback = repeatCallback;
     }
 
+    /**
+     * Undo the action performed in this history event.
+     * Always returns a promise.
+     */
     undo() {
         const r = this.undoCallback();
         if(r instanceof Promise) {
@@ -210,6 +246,10 @@ class HistoryItem {
         }
     }
 
+    /**
+     * Repeats a previously undone history event.
+     * Always returns a promise.
+     */
     repeat() {
         const r = this.repeatCallback();
         if(r instanceof Promise) {
@@ -219,11 +259,21 @@ class HistoryItem {
         }
     }
 
+    /**
+     * Returns a string describing this history
+     * event in human readable form
+     */
     getDescription() {
         return this.description;
     }
 }
 
+/**
+ * Class that manages a history stack, including undo, repeat etc.
+ * 
+ * This implements a linear history stack, so as soon as a new history
+ * item is pushed, it's no longer possible to repeat previous actions.
+ */
 class HistoryManager extends EventEmitter {
     constructor() {
         super();
@@ -233,15 +283,23 @@ class HistoryManager extends EventEmitter {
         this.history = [];
     }
 
+    /**
+     * Returns true when there are event on the stack that can be undone
+     */
     canUndo() {
         return this.history.length > 0 && this.historyPointer >= 0;
     }
 
+    /**
+     * Returns true when there are previously undone events still on the stack
+     */
     canRepeat() {
         return this.history.length - 1 > this.historyPointer;
     }
 
-    // Undo the latest action
+    /**
+     * Undo the last upper most not-yet-undone action on the stack
+     */
     async undo() {
         if(this.canUndo()) {
             const item = this.history[this.historyPointer--];
@@ -253,7 +311,9 @@ class HistoryManager extends EventEmitter {
         }
     }
 
-    // Repeat the last action
+    /**
+     * Repeats the last undone action on the stack
+     */
     async repeat() {
         if(this.canRepeat()) {
             const item = this.history[++this.historyPointer];
@@ -265,7 +325,11 @@ class HistoryManager extends EventEmitter {
         }
     }
 
-    // Push a new history item on the history stack
+    /**
+     * Pushes a new history event item on the stack. Note that as soon as a history item
+     * is pushed you can no longer repeat previously undone actions.
+     * @param {HistoryItem} item 
+     */
     push(item) {
         if(item instanceof HistoryItem) {
             // Make sure to delete all 'repeat' actions after the current item
