@@ -46,10 +46,6 @@ const AlgoLibImageDataHelper = {
 
 /**
  * Class that contains shared drawing algorithms.
- * 
- * Most of the algorithms found here are adapted from
- * Zingl Alois 'easyfilter' lib, 
- * @see http://members.chello.at/easyfilter/bresenham.js
  */
 class AlgoLib {
 
@@ -75,7 +71,11 @@ class AlgoLib {
     }
 
     /**
-     * Does flood fill on a given context, based on the existing data in a reference context
+     * Does flood fill on a given context, based on the existing data in a reference context.
+     * 
+     * Using an iterative approach to not run into issues with stack sizes that the
+     * Stack-Overflow implementation is prone to with larger images
+     * 
      * @param {CanvasRenderingContext2D} ctxTag Context of the canvas to render to 
      * @param {CanvasRenderingContext2D} ctxRef Context of the canvas used as fill reference
      * @param {*} x0 Left coordinate  
@@ -146,6 +146,10 @@ class AlgoLib {
      * Draw a line using bresenham's algorithm. 
      * Other than the canvas native lineTo function, this gives the same pixelated
      * result that can be found in the original paint application
+     * 
+     * Adapted from Zingl Alois 'easyfilter' lib, 
+     * @see http://members.chello.at/easyfilter/bresenham.js
+     * 
      * @param {CanvasRenderingContext2D} ctx Context to render on
      * @param {Number} x0 Start left coordinate
      * @param {Number} y0 Start top coordinate
