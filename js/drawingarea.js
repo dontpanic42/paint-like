@@ -214,8 +214,11 @@ class DrawingCanvas extends EventEmitter {
         this.active = this.inactive;
         this.inactive = oldActive;
 
-        this.drawingArea.htmlElement.removeChild(this.cvs[this.inactive]);
-        this.drawingArea.htmlElement.appendChild(this.cvs[this.active]);
+        // The preview area always has to be on top, so make sure that we add
+        // the new active area *below* the preview
+        this.drawingArea.htmlElement.replaceChild(
+            this.cvs[this.active],          // to be added
+            this.cvs[this.inactive]);       // to be removed
     }
 
     /**
