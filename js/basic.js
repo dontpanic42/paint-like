@@ -148,18 +148,22 @@ class Plugin extends EventEmitter {
 }
 
 class PluginLoader {
-    constructor() {
-        this.pluginLoaderDebugMode = true;
+    constructor(debugMode = false) {
+        this.pluginLoaderDebugMode = debugMode;
         this.plugins = {};
         // Global plugin registry setup
         window.plugins = {};
     }
 
+    debugPrint(...args) {
+        if(this.pluginLoaderDebugMode) {
+            console.log('[PluginLoader]:', ...args);
+        }
+    }
+
     loadJsFile(fullPath) {
         return new Promise((resolve, reject) => {
-            if(this.pluginLoaderDebugMode) {
-                console.log(`[PluginLoader]: Loading javascript file ${fullPath}`)
-            }
+            this.debugPrint(`Loading javascript file ${fullPath}`)
 
             const scriptElement = document.createElement('script');
             scriptElement.onload = resolve;
@@ -172,9 +176,7 @@ class PluginLoader {
 
     loadCssFile(fullPath) {
         return new Promise((resolve, reject) => {
-            if(this.pluginLoaderDebugMode) {
-                console.log(`[PluginLoader]: Loading css file ${fullPath}`)
-            }
+            this.debugPrint(`Loading css file ${fullPath}`)
 
             const linkElement = document.createElement('link');
             linkElement.onload = resolve;
@@ -194,15 +196,17 @@ class PluginLoader {
 
         // Ensure the plugin was loaded successfully
         if(typeof(window.plugins[name]) === 'undefined') {
-            throw new Error(`[PluginLoader]: Unable to load plugin "${name}" - class does not exist in "window.plugins" after loading.`);
-        } else if(this.pluginLoaderDebugMode) {
-            console.log(`[PluginLoader]: New plugin "${name}" exists in namespace.`);
-        }
+            console.error(`[PluginLoader]: Unable to load plugin "${name}" - class does not exist in "window.plugins" after loading.`);
+            return;
+        } 
+            
+        this.debugPrint(`New plugin "${name}" exists in namespace.`);
 
         // Instanciate plugin
         const plugin = this.plugins[name] = new window.plugins[name](appManager);
         if (!(plugin instanceof Plugin)) {
-            throw new Error(`[PluginLoader]: Unable to load plugin "${name}" - plugin not instance of "Plugin" baseclass`)
+            console.error(`[PluginLoader]: Unable to load plugin "${name}" - plugin not instance of "Plugin" baseclass`)
+            return;
         }
 
         // Fetch resource requirements by plugin 
@@ -211,14 +215,24 @@ class PluginLoader {
         await Promise.all(resources.css.map((r) => {
             const fullPath = `plugins/${name}/css/${r}`;
             return this.loadCssFile(fullPath).then(() => {
-                if(this.pluginLoaderDebugMode) {
-                    console.log(`[PluginLoader]: Done loading css resource ${r} for plugin ${name}`);
-                }
+                this.debugPrint(`Done loading css resource ${r} for plugin ${name}`);
             });
         }));
 
-        // Run plugin initialization
-        plugin.init();
+        try {
+            // Run plugin initialization
+            const r = plugin.init();
+            // When the result is a promise, we need to wait for the initialization to be finisehd
+            if(r instanceof Promise) {
+                // Wait for it to be resolved
+                await r;
+            }
+
+            console.log(`[PluginLoader]: OK: ${name}`);
+        } catch (e) {
+            // When there was an error during plugin initialization, show an error message
+            console.error(`[PluginLoader]: FAILED-INIT: ${name}`, e);
+        }   
     }
 }
 
