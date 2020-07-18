@@ -239,11 +239,7 @@ class HistoryItem {
      */
     undo() {
         const r = this.undoCallback();
-        if(r instanceof Promise) {
-            return r;
-        } else {
-            return Promise.resolve();
-        }
+        return (r instanceof Promise) ? r : Promise.resolve();
     }
 
     /**
@@ -252,11 +248,7 @@ class HistoryItem {
      */
     repeat() {
         const r = this.repeatCallback();
-        if(r instanceof Promise) {
-            return r;
-        } else {
-            return Promise.resolve();
-        }
+        return (r instanceof Promise) ? r : Promise.resolve();
     }
 
     /**
