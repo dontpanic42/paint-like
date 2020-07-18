@@ -1,4 +1,4 @@
-class HistoryControls extends Plugin {
+class HistoryControlsPlugin extends Plugin {
     constructor() {
         super();
     }
@@ -68,4 +68,4 @@ class HistoryControls extends Plugin {
 }
 
 // Register plugin in plugin registry
-window.plugins.HistoryControls = HistoryControls;
+window.plugins.HistoryControlsPlugin = HistoryControlsPlugin;

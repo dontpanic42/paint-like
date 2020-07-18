@@ -3,26 +3,30 @@ class ColorManager extends EventEmitter {
     constructor() {
         super(false);
 
+        // Defautl color palette
         this.palette = [
-            [0,255,255],
-            [0,0,0],
-            [0,0,255],
-            [255,0,255],
-            [0,128,0],
-            [0,255,0],
-            [128,0,0],
-            [0,0,128],
-            [128,128,0],
-            [128,0,128],
-            [255,0,0],
-            [192,192,192],
-            [0,128,128],
-            [255,255,255],
-            [255,255,0],
+            [   0,   0,   0], [ 255, 255, 255],
+            [ 128, 128, 128], [ 192, 192, 192],
+            [ 128,   0,   0], [ 255,   0,   0], 
+            [ 128, 128,   0], [ 255, 255,   0], 
+            [   0, 128,   0], [   0, 255,   0],
+            [   0, 128, 128], [   0, 255, 255],  
+            [   0,   0, 128], [   0,   0, 255],
+            [ 128,   0, 128], [ 255,   0, 255], 
+            [ 128, 128,  64], [ 255, 255, 128],
+            [   0,  64,  64], [   0, 255, 128],
+            [   0, 128, 255], [ 128, 255, 255], 
+            [   0,  64, 128], [ 128, 128, 255],
+            [ 128,   0, 255], [ 255,   0, 128], 
+            [ 128,  64,   0], [ 255, 128,  64]
         ];
 
-        this.selectedForegroundColor = 1;
-        this.selectedBackgroundColor = 14;
+        // Index of the currently selected foreground color 
+        // Default = Black
+        this.selectedForegroundColor = 0;
+        // Index of the currently selected background color
+        // Default = White
+        this.selectedBackgroundColor = 1;
     }
 
     /**

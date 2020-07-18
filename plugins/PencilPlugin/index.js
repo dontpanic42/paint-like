@@ -1,4 +1,4 @@
-class PaintBrushTool extends Tool {
+class PencilTool extends Tool {
     constructor(appManager) {
         super();
 
@@ -62,7 +62,7 @@ class PaintBrushTool extends Tool {
     }
 
     getName() {
-        return 'Paint Brush';
+        return 'Pencil';
     }
 
     getDescription() {
@@ -70,7 +70,7 @@ class PaintBrushTool extends Tool {
     }
 
     getButtonCssClass() {
-        return 'paint-brush-tool-button';
+        return 'pencil-tool-button';
     }
 
     // Called when the tool was selected by the user
@@ -88,23 +88,23 @@ class PaintBrushTool extends Tool {
     }
 }
 
-class PaintBrush extends Plugin {
+class PencilPlugin extends Plugin {
     constructor() {
         super();
     }
 
     getResources() {
         return { 
-            css: ['paintbrush.css']
+            css: ['pencil.css']
         };
     }
 
     init() {
         const appCore = this.getAppManager().core;
 
-        appCore.toolManager.addTool(new PaintBrushTool(this.getAppManager()));
+        appCore.toolManager.addTool(new PencilTool(this.getAppManager()));
     }
 }
 
 // Register plugin in plugin registry
-window.plugins.PaintBrush = PaintBrush;
+window.plugins.PencilPlugin = PencilPlugin;

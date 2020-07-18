@@ -1,4 +1,4 @@
-class PaintLineTool extends Tool {
+class LineTool extends Tool {
     constructor(appManager) {
         super();
 
@@ -53,7 +53,7 @@ class PaintLineTool extends Tool {
     }
 
     getName() {
-        return 'Paint Brush';
+        return 'Line Tool';
     }
 
     getDescription() {
@@ -61,7 +61,7 @@ class PaintLineTool extends Tool {
     }
 
     getButtonCssClass() {
-        return 'paint-line-tool-button';
+        return 'line-tool-button';
     }    
     
     // Called when the tool was selected by the user
@@ -79,23 +79,23 @@ class PaintLineTool extends Tool {
     }
 }
 
-class PaintLine extends Plugin {
+class LinePlugin extends Plugin {
     constructor() {
         super();
     }
 
     getResources() {
         return { 
-            css: ['paintline.css']
+            css: ['line.css']
         };
     }
 
     init() {
         const appCore = this.getAppManager().core;
 
-        appCore.toolManager.addTool(new PaintLineTool(this.getAppManager()));
+        appCore.toolManager.addTool(new LineTool(this.getAppManager()));
     }
 }
 
 // Register plugin in plugin registry
-window.plugins.PaintLine = PaintLine;
+window.plugins.LinePlugin = LinePlugin;

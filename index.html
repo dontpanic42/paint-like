@@ -100,10 +100,10 @@
                 
                 // Load all the plugins
                 await Promise.all([
-                    appManager.core.pluginLoader.loadPlugin('PaintBrush'),
-                    appManager.core.pluginLoader.loadPlugin('PaintLine'),
-                    appManager.core.pluginLoader.loadPlugin('ZoomControls'),
-                    appManager.core.pluginLoader.loadPlugin('HistoryControls')
+                    appManager.core.pluginLoader.loadPlugin('PencilPlugin'),
+                    appManager.core.pluginLoader.loadPlugin('LinePlugin'),
+                    appManager.core.pluginLoader.loadPlugin('ZoomControlsPlugin'),
+                    appManager.core.pluginLoader.loadPlugin('HistoryControlsPlugin')
                 ]);
             };
 

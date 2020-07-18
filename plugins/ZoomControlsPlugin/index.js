@@ -1,4 +1,4 @@
-class ZoomControlsTool extends Tool {
+class ZoomTool extends Tool {
     constructor(appManager) {
         super();
 
@@ -95,7 +95,7 @@ class ZoomControlsTool extends Tool {
      * Returns the css class for this tools tool button
      */
     getButtonCssClass() {
-        return 'zoom-controls-tool-button';
+        return 'zoom-tool-button';
     }
 
     /**
@@ -116,7 +116,7 @@ class ZoomControlsTool extends Tool {
 /**
  * Main Zoom Controls Plugin class
  */
-class ZoomControls extends Plugin {
+class ZoomControlsPlugin extends Plugin {
     constructor() {
         super();
     }
@@ -126,7 +126,7 @@ class ZoomControls extends Plugin {
      */
     getResources() {
         return { 
-            css: ['zoomcontrols.css']
+            css: ['zoom.css']
         };
     }
 
@@ -136,9 +136,9 @@ class ZoomControls extends Plugin {
     init() {
         const appCore = this.getAppManager().core;
         // Add the new tool to the toolbar
-        appCore.toolManager.addTool(new ZoomControlsTool(this.getAppManager()));
+        appCore.toolManager.addTool(new ZoomTool(this.getAppManager()));
     }
 }
 
 // Register plugin in plugin registry
-window.plugins.ZoomControls = ZoomControls;
+window.plugins.ZoomControlsPlugin = ZoomControlsPlugin;
