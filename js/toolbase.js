@@ -9,13 +9,17 @@ class ToolOption extends EventEmitter {
      * @param {String} cssClass CSS class that will be given to the option container 
      * @param {String} template (optional) HTML template that will be added to container
      */
-    constructor(cssClass, template = '') {
+    constructor({cssClass, template = '', defaultEventHandler = undefined}) {
         super();
 
         this.cssClass = cssClass;
         this.template = template;
 
         this.selected = false;
+
+        if(defaultEventHandler) {
+            this.addEventListener('select', defaultEventHandler);
+        }
     }
 
     /**
@@ -32,12 +36,15 @@ class ToolOption extends EventEmitter {
     setSelected(val) {
         if(val != this.selected) {
             this.selected = val;
-            this.emitEvent('select', this);
+            const event = val ? 'select' : 'deselect';
+            this.emitEvent(event, this);
         }
     }
 
     /**
-     * Returns the CSS class that will be given to the option container
+     * Returns the CSS class(es) that will be given to the option container.
+     * 
+     * Return value can be a string or an array.
      */
     getCssClass() {
         return this.cssClass;
@@ -220,34 +227,46 @@ class ToolOptionsBar {
      * @param {Tool} tool 
      */
     selectTool(tool) {
-        this.htmlElement.innerHtml = '';
-        (tool.getToolOptions() || []).forEach((option) => {
+        // Remove all child nodes of the option menu
+        while(this.htmlElement.firstChild) {
+            this.htmlElement.removeChild(this.htmlElement.firstChild);
+        }
+
+        const toolOptions = tool.getToolOptions() || [];
+        toolOptions.forEach((option) => {
             // Create a container element for the option
             const el = document.createElement('div');
-            // Assign the default- and user defined css classes
-            el.classList.add('tool-option', option.getCssClass());
+            // Assign the default- and user defined css classes. Custo css class
+            // can be a string or an array
+            const cssCls = ['tool-option'].concat(option.getCssClass());
+            el.classList.add(...cssCls);
             // Set the content to the template (if any)
             el.innerHTML = option.getTemplate();
-            // Add an onclick event handler for optoin selection
-            el.addEventListener('click', (e) => {
-                console.log('clicked on option', option, this.htmlElement.children);
 
-                // Only proceed if the tool is not yet selected
-                if(!option.isSelected()) {
-                    // Set all other tools to not selected
-                    tool.getToolOptions().forEach((option) => option.setSelected(false));
-                    // Ensure that all html elements lose the 'selected' class
-                    for(let i = 0; i < this.htmlElement.children.length; i++) {
-                        this.htmlElement.children[i].classList.remove('selected');
-                    }
-                    // Add the 'selected' class to the current element
-                    el.classList.add('selected');
-                    // Set the option as 'selected'
-                    option.setSelected(true);
+            // Add an event listener to the option so we get notified when
+            // the selection state changes
+            option.addEventListener('select', () => {
+                // Set all other tools to not selected
+                toolOptions.forEach((option) => option.setSelected(false));
+                // Ensure that all html elements lose the 'selected' class
+                for(let i = 0; i < this.htmlElement.children.length; i++) {
+                    this.htmlElement.children[i].classList.remove('selected');
                 }
-            }, false);
+                // Add the 'selected' class to the current element
+                el.classList.add('selected');
+            });
 
+            // Add an onclick event handler for option selection. All the logic is in
+            // the options 'select' event listener
+            el.addEventListener('click', () => option.setSelected(true), false);
+
+            // Add the menu item to the DOM
             this.htmlElement.appendChild(el);
         });
+        
+        // Select the first tool option (if there are any)
+        if(toolOptions.length) {
+            toolOptions[0].setSelected(true);
+        }
     }
 }

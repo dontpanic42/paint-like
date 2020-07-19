@@ -84,14 +84,6 @@ class DrawingArea extends EventEmitter {
  * Class that handles all the canvas elements inside the
  * drawing area.
  * 
- * Basic idea is to always have 3 canvases:
- * 1. Buffer 1
- * 2. Buffer 2
- * 3. Preview
- * 
- * During resize, canvases get cleared. Therefore we just have two
- * canvases, flipping/copying values after each resize.
- * 
  * All drawing operations are done on the preview canvas. This is to have
  * easier undo/redo capabilities.
  */

@@ -34,6 +34,29 @@ const AlgoLibImageDataHelper = {
     },
 
     /**
+     * Set color of a given rectangle in given image data
+     * @param {ImageData} data The image data to work on
+     * @param {Number} x
+     * @param {Number} y
+     * @param {Number} width
+     * @param {Number} height
+     * @param {Array} color The color to set the pixel to
+     */
+    setColorRect: (data, x, y, width, height, [r, g, b]) => {
+        let x1 = x + width;
+        let y1 = y + height;
+        for(let ix = x; ix < x1; ix++) {
+            for(let iy = y; iy < y1; iy++) {
+                const offset = (iy * data.width + ix) << 2;
+                data.data[offset  ] = r;
+                data.data[offset+1] = g;
+                data.data[offset+2] = b;
+                data.data[offset+3] = 255;
+            }
+        }
+    },
+
+    /**
      * Returns whether or not two give arrays containing r,g and b values
      * are equal
      * @param {Array} a Color 1
@@ -58,15 +81,9 @@ class AlgoLib {
      * @param {Array} color Color of the pixel to draw
      */
     putPixel(ctx, x0, y0, width, color) {
-        const {setColor} = AlgoLibImageDataHelper;
+        const {setColorRect} = AlgoLibImageDataHelper;
         const data = ctx.getImageData(x0, y0, width, width);
-
-        for(let x = 0; x < width; x++) {
-            for(let y = 0; y < width; y++) {
-                setColor(data, x, y, color)
-            }
-        }
-
+        setColorRect(data, x0, y0, width, width, color);
         ctx.putImageData(data, x0, y0);
     }
 
@@ -159,18 +176,31 @@ class AlgoLib {
      * @param {Array} color Color of the line to draw
      */
     drawLine(ctx, x0, y0, x1, y1, linewidth, color) {
-        x0 = x0 | 0;
-        y0 = y0 | 0;
-        x1 = x1 | 0;
-        y1 = y1 | 0;
+        // Import some helpers that make it easier to work with raw image data
+        const {setColorRect} = AlgoLibImageDataHelper;
 
-        const dx = Math.abs(x1 - x0), sx = x0 < x1 ? 1 : -1;
-        const dy = -Math.abs(y1 - y0), sy = y0 < y1 ? 1 : -1;
+        // Ensure we are working with integers, no sub-pixel rendering in paint :-)
+        x0 = x0 | 0; y0 = y0 | 0;
+        x1 = x1 | 0; y1 = y1 | 0;
+
+        // Calculate the area we need to grab from the context. Note that we will
+        // have to add the linewith, since in the bottom right we have to add
+        // the rectangle we are actually drawing
+        const lx = Math.min(x0, x1);                // Left-most x coordinate
+        const ty = Math.min(y0, y1);                // Top-most y coordinate
+        const width = Math.abs(x1 - x0);
+        const height = Math.abs(y1 - y0);
+        
+        // Get the raw image data from the reference
+        const data = ctx.getImageData(lx, ty, width + linewidth, height + linewidth);
+
+        const dx = width, sx = x0 < x1 ? 1 : -1;
+        const dy = -height, sy = y0 < y1 ? 1 : -1;
         let err = dx + dy;
         let e2;
 
         while(x0 != x1 || y0 != y1) {
-            this.putPixel(ctx, x0, y0, linewidth, color);
+            setColorRect(data, x0 - lx, y0 - ty, linewidth, linewidth, color);
             e2 = 2 * err;
             if (e2 >= dy) {
                 err += dy; 
@@ -182,5 +212,8 @@ class AlgoLib {
                 y0 += sy;
             }
         }
+
+        // Copy the data we were working with back to the context
+        ctx.putImageData(data, lx, ty);
     }
 }

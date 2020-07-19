@@ -1,3 +1,58 @@
+:root {
+}
+
+/* Tool Button */
 .line-tool-button {
     background-image: url('../img/line.png');
+}
+
+/* Tool Options */
+.tool-option.line-plugin-option {
+    --lp-option-padding: 5px;
+    --lp-option-width-x1: 1px;
+    --lp-option-width-x2: 2px;
+    --lp-option-width-x3: 3px;
+    --lp-option-width-x4: 4px;
+    --lp-option-width-x5: 5px;
+
+    position: relative;
+}
+
+.tool-option.line-plugin-option::after {
+    position: absolute;
+    left: var(--lp-option-padding);
+    right: var(--lp-option-padding); 
+    top: 50%;
+    content: ' ';
+    height: 10px;
+    background-color: black;
+}
+
+.tool-option.line-plugin-option.selected::after {
+    background-color: white;
+}
+
+.tool-option.line-plugin-option.x1::after {
+    top: calc(50% - (var(--lp-option-width-x1) / 2));
+    height: var(--lp-option-width-x1);
+}
+
+.tool-option.line-plugin-option.x2::after {
+    top: calc(50% - (var(--lp-option-width-x2) / 2));
+    height: var(--lp-option-width-x2);
+}
+
+.tool-option.line-plugin-option.x3::after {
+    top: calc(50% - (var(--lp-option-width-x3) / 2));
+    height: var(--lp-option-width-x3);
+}
+
+.tool-option.line-plugin-option.x4::after {
+    top: calc(50% - (var(--lp-option-width-x4) / 2));
+    height: var(--lp-option-width-x4);
+}
+
+.tool-option.line-plugin-option.x5::after {
+    top: calc(50% - (var(--lp-option-width-x5) / 2));
+    height: var(--lp-option-width-x5);
 }

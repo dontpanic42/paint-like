@@ -8,8 +8,10 @@ class LineTool extends Tool {
         const history = appCore.historyManager;
         const algoLib = appManager.util.algoLib;
         
-        const lineWidth = 1;
         const previousPoint = {x: 0, y: 0};
+
+        
+        this.lineWidth = 1;
 
         this.mouseDownEventHandler = (e) => {
             previousPoint.x = e.canvasX;
@@ -29,7 +31,7 @@ class LineTool extends Tool {
                 previousPoint.y, 
                 e.canvasX, 
                 e.canvasY, 
-                lineWidth, 
+                this.lineWidth, 
                 color.getForegroundColorAsRgb());
         };
     }
@@ -48,10 +50,11 @@ class LineTool extends Tool {
     
     getToolOptions() {
         return [
-            new ToolOption('line-plugin-option-x1'),
-            new ToolOption('line-plugin-option-x2'),
-            new ToolOption('line-plugin-option-x3'),
-            new ToolOption('line-plugin-option-x4'),
+            new ToolOption({cssClass: ['line-plugin-option', 'x1'], defaultEventHandler: () => this.lineWidth = 1}),
+            new ToolOption({cssClass: ['line-plugin-option', 'x2'], defaultEventHandler: () => this.lineWidth = 2}),
+            new ToolOption({cssClass: ['line-plugin-option', 'x3'], defaultEventHandler: () => this.lineWidth = 3}),
+            new ToolOption({cssClass: ['line-plugin-option', 'x4'], defaultEventHandler: () => this.lineWidth = 4}),
+            new ToolOption({cssClass: ['line-plugin-option', 'x5'], defaultEventHandler: () => this.lineWidth = 5})
         ]
     }
     
