@@ -29,3 +29,26 @@
     background-color: var(--pcolor-button-background-active);
     border: 1px solid var(--pcolor-button-border);
 }
+
+/**
+ * Tool Options
+ */
+.tools-container .tool-options {
+    border-bottom: 1px solid var(--pcolor-panel-border-light);
+    border-right: 1px solid var(--pcolor-panel-border-light);
+    border-top: 1px solid var(--pcolor-panel-border-dark);
+    border-left: 1px solid var(--pcolor-panel-border-dark);
+    height: var(--tool-options-height);
+    margin: 8px 4px;
+
+    display: flex;
+    flex-direction: column;
+}
+
+.tools-container .tool-options > div {
+    flex: 1;
+}
+
+.tools-container .tool-options > div.selected {
+    background-color: var(--pcolor-menu-item-active);
+}

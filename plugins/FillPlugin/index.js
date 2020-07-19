@@ -8,7 +8,7 @@ class FillTool extends Tool {
         const history = appCore.historyManager;
         const algoLib = appManager.util.algoLib;
 
-        this.mouseDownEventHandler = (e) => {
+        this.mouseDownEventHandler = ({canvasX, canvasY}) => {
             // Get the main context - will be used as reference on where to fill
             // and where not to fill
             const ctxMain = canvas.context;

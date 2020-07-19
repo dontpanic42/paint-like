@@ -44,7 +44,16 @@ class LineTool extends Tool {
 
     getButtonCssClass() {
         return 'line-tool-button';
-    }    
+    }  
+    
+    getToolOptions() {
+        return [
+            new ToolOption('line-plugin-option-x1'),
+            new ToolOption('line-plugin-option-x2'),
+            new ToolOption('line-plugin-option-x3'),
+            new ToolOption('line-plugin-option-x4'),
+        ]
+    }
     
     // Called when the tool was selected by the user
     onActivate() {
