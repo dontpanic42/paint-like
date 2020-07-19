@@ -235,6 +235,15 @@ class DrawingCanvas extends EventEmitter {
     }
 
     /**
+     * Clears the main canvas
+     * @param {Array} color Clear Color 
+     */
+    clear([r, g, b]) {
+        this.context.fillStyle = `rgb(${r}, ${g}, ${b})`; 
+        this.context.fillRect(0, 0, this.canvas.main.width, this.canvas.main.height);
+    }
+
+    /**
      * The html element for the currently active canvas
      */
     get htmlElement() {

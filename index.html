@@ -90,6 +90,9 @@
                     }
                 }
 
+                // Setup canvas: Clear it with the background color
+                appManager.core.drawingArea.canvas.clear(appManager.core.colorManager.getBackgroundColorAsRgb());
+
                 // Setup basic ui elements
                 toolBar = new ToolBar(appManager.core.toolManager, 
                     document.querySelector('.toolbar'));
