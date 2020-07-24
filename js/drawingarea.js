@@ -46,7 +46,7 @@ class DrawingArea extends EventEmitter {
      * @param {Number} height Logical height of the drawing area 
      * @param {Boolean} final (optional) Flag that indicates if this resize is part of an ongoing drag operation 
      */
-    setSize (width, height, final = false) {
+    setSize (width, height, final = true) {
         this.htmlElement.style.width =  `${(width * this.scale.x) | 0}px`;
         this.htmlElement.style.height = `${(height * this.scale.y) | 0}px`;
 
@@ -311,7 +311,7 @@ class DrawingAreaResizer {
                 width: drawingArea.getSize().width * drawingArea.getScale().x,
                 height: drawingArea.getSize().height * drawingArea.getScale().y
             }
-            
+
             originalMousePos.x = e.clientX
             originalMousePos.y = e.clientY;
 

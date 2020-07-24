@@ -3,6 +3,71 @@ class FileMenuPlugin extends Plugin {
         super();
     }
 
+    async clickOpenMenu({core}) {
+        if(!confirm('Are you sure you want to create a new image?')) {
+            return;
+        }
+
+        /**
+         * Shows a file chooser, returns a list of files
+         * @param {Array} acceptMimes array that contains list of accepted mime types 
+         */
+        const showFileInput = (acceptMimes) => {
+            return new Promise((resolve) => {
+                const input = document.createElement('input');
+                input.setAttribute('type', 'file');
+                input.setAttribute('accept', acceptMimes.join(', '));
+                input.setAttribute('multiple', 'false');
+                input.addEventListener('input', (e) => {
+                    resolve(input.files);
+                })
+                input.click();
+            });
+        }
+
+        /**
+         * Reads a file, converts it to a data url
+         * @param {File} file 
+         */
+        const readDataUrl = (file) => {
+            return new Promise((resolve, reject) => {
+                const fileReader = new FileReader();
+                fileReader.onload = () => resolve(fileReader.result);
+                fileReader.onerror = (e) => reject(e);
+                fileReader.readAsDataURL(file);
+            });
+        }
+
+        /**
+         * Creates an image element from a given data url
+         * @param {String} dataUrl 
+         */
+        const dataToImage = (dataUrl) => {
+            return new Promise((resolve, reject) => {
+                const img = document.createElement('img');
+                img.onload = () => resolve(img);
+                img.onerror = (e) => reject(e);
+                img.src = dataUrl;
+            });
+        }
+
+        // We accept any image file type for opening
+        const openAccept = FileMenuPlugin.fileTypes.map(f => f.mime);
+        // Show the file chooser
+        const files = await showFileInput(openAccept);
+        // Read data form file
+        const data = await readDataUrl(files[0]);
+        // Convert data to image
+        const img = await dataToImage(data);
+
+        // Update the drawing area size to the size of the image
+        core.drawingArea.setSize(img.width, img.height);
+        // Get the drawing context
+        const ctx = core.drawingArea.canvas.context;
+        // Draw the image onto the canvas
+        ctx.drawImage(img, 0, 0); 
+    }
+
     clickSaveMenu({core}) {
         // For now: Always save as png
         const fileType = FileMenuPlugin.fileTypes[0];
@@ -44,6 +109,7 @@ class FileMenuPlugin extends Plugin {
 
         [
             {name: 'New',   handler: 'clickNewMenu',  modifier: 'n'},
+            {name: 'Open',  handler: 'clickOpenMenu', modifier: 'o'},
             {name: 'Save',  handler: 'clickSaveMenu', modifier: 's'}
         ].forEach(({name, handler, modifier}) => {
             // Create a new menu entry for the file menu
@@ -66,7 +132,7 @@ class FileMenuPlugin extends Plugin {
 
 FileMenuPlugin.fileTypes = [
     {name: 'png', mime: 'image/png', suffix: 'png'},
-    {name: 'jpg', mime: 'image/jpg', suffix: 'jpg'}
+    {name: 'jpg', mime: 'image/jpeg', suffix: 'jpg'}
 ]
 
 // Register plugin in plugin registry
