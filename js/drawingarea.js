@@ -307,7 +307,11 @@ class DrawingAreaResizer {
         };
 
         htmlElement.onmousedown = (e) => {
-            originalSize = drawingArea.getSize();
+            originalSize = {
+                width: drawingArea.getSize().width * drawingArea.getScale().x,
+                height: drawingArea.getSize().height * drawingArea.getScale().y
+            }
+            
             originalMousePos.x = e.clientX
             originalMousePos.y = e.clientY;
 

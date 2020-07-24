@@ -42,11 +42,34 @@ const AlgoLibImageDataHelper = {
      * @param {Number} height
      * @param {Array} color The color to set the pixel to
      */
-    setColorRect: (data, x, y, width, height, [r, g, b]) => {
-        let x1 = x + width;
-        let y1 = y + height;
-        for(let ix = x; ix < x1; ix++) {
-            for(let iy = y; iy < y1; iy++) {
+    setColorRect: (data, x, y, width, height, color) => {
+        AlgoLibImageDataHelper.setColorRect2P(
+            data,
+            x, 
+            y, 
+            x + width - 1,
+            y + height - 1,
+            color
+        );
+    },
+
+    /**
+     * Set color of a given rectangle in given image data
+     * @param {ImageData} data The image data to work on
+     * @param {Number} x0
+     * @param {Number} y0
+     * @param {Number} x1
+     * @param {Number} y1
+     * @param {Array} color The color to set the pixel to
+     */
+    setColorRect2P: (data, x0, y0, x1, y1, [r, g, b]) => {
+        const ux0 = Math.min(x0, x1);
+        const ux1 = Math.max(x0, x1);
+        const uy0 = Math.min(y0, y1);
+        const uy1 = Math.max(y0, y1);
+
+        for(let ix = ux0; ix <= ux1; ix++) {
+            for(let iy = uy0; iy <= uy1; iy++) {
                 const offset = (iy * data.width + ix) << 2;
                 data.data[offset  ] = r;
                 data.data[offset+1] = g;
@@ -83,7 +106,7 @@ class AlgoLib {
     putPixel(ctx, x0, y0, width, color) {
         const {setColorRect} = AlgoLibImageDataHelper;
         const data = ctx.getImageData(x0, y0, width, width);
-        setColorRect(data, x0, y0, width, width, color);
+        setColorRect(data, 0, 0, width, width, color);
         ctx.putImageData(data, x0, y0);
     }
 
@@ -165,6 +188,7 @@ class AlgoLib {
      * result that can be found in the original paint application
      * 
      * Adapted from Zingl Alois 'easyfilter' lib, 
+     * @see http://members.chello.at/easyfilter/bresenham.html
      * @see http://members.chello.at/easyfilter/bresenham.js
      * 
      * @param {CanvasRenderingContext2D} ctx Context to render on
@@ -211,6 +235,81 @@ class AlgoLib {
                 err += dx;
                 y0 += sy;
             }
+        }
+
+        // Copy the data we were working with back to the context
+        ctx.putImageData(data, lx, ty);
+    }
+
+    /**
+     * Draws an ellipse
+     * 
+     * Adapted from Zingl Alois 'easyfilter' lib, 
+     * @see http://members.chello.at/easyfilter/bresenham.html
+     * @see http://members.chello.at/easyfilter/bresenham.js
+     * 
+     * @param {CanvasRenderingContext2D} ctx Context to render on
+     * @param {Number} x0 Start left coordinate
+     * @param {Number} y0 Start top coordinate
+     * @param {Number} x1 End left coordinate
+     * @param {Number} y1 End top coordinate
+     * @param {Number} linewidth Width of the border line to draw
+     * @param {Array} borderColor Color of the border
+     * @param {Array} fillColor Fill color
+     */
+    drawEllipse(ctx, x0, y0, x1, y1, linewidth, color, fill) {
+
+        // Import some helpers that make it easier to work with raw image data
+        const {setColorRect, setColorRect2P} = AlgoLibImageDataHelper;
+
+        // Ensure we are working with integers, no sub-pixel rendering in paint :-)
+        x0 = x0 | 0; y0 = y0 | 0;
+        x1 = x1 | 0; y1 = y1 | 0;
+
+        // Calculate the area we need to grab from the context. Note that we will
+        // have to add the linewith, since in the bottom right we have to add
+        // the rectangle we are actually drawing
+        const lx = Math.min(x0, x1);                // Left-most x coordinate
+        const ty = Math.min(y0, y1);                // Top-most y coordinate
+        const width = Math.abs(x1 - x0);
+        const height = Math.abs(y1 - y0);
+        const centerXOffset = width / 2;
+
+        // Get the raw image data from the reference
+        const data = ctx.getImageData(lx, ty, width + linewidth, height + linewidth);
+
+        let a = width, b = height, b1 = b&1;             // diameter
+        let dx = 4*(1.0-a)*b*b, dy = 4*(b1+1)*a*a;       // error increment
+        let err = dx+dy+b1*a*a, e2;                      // error of 1.step
+     
+        if (x0 > x1) { x0 = x1; x1 += a; }               // if called with swapped points
+        if (y0 > y1) y0 = y1;                            // .. exchange them
+        y0 += (b+1)>>1; y1 = y0-b1;                      // starting pixel
+        a = 8*a*a; b1 = 8*b*b;                               
+        
+        do {                                                 
+            if(fill) {
+                setColorRect2P(data, x1 - lx, y0 - ty, centerXOffset, y0 - ty - 1, color);      // Bottom right quadrant
+                setColorRect2P(data, x0 - lx, y0 - ty, centerXOffset, y0 - ty - 1, color);      // Bottom left quadrant
+                setColorRect2P(data, x0 - lx, y1 - ty, centerXOffset, y1 - ty + 1, color);      // Top left quadrant
+                setColorRect2P(data, x1 - lx, y1 - ty, centerXOffset, y1 - ty + 1, color);      // Top right quadrant
+            } else  {
+                setColorRect(data, x1 - lx, y0 - ty, linewidth, linewidth, color);            // Bottom right quadrant
+                setColorRect(data, x0 - lx, y0 - ty, linewidth, linewidth, color);            // Bottom right quadrant
+                setColorRect(data, x0 - lx, y1 - ty, linewidth, linewidth, color);            // Top left quadrant
+                setColorRect(data, x1 - lx, y1 - ty, linewidth, linewidth, color);            // Top right quadrant
+            }
+
+           e2 = 2*err;
+            if (e2 <= dy) { y0++; y1--; err += dy += a; }                                        // Y Step
+            if (e2 >= dx || 2*err > dy) { x0++; x1--; err += dx += b1; }                         // X Step
+        } while (x0 <= x1);
+     
+        while (y0-y1 <= b) {                                                                     // too early stop of flat ellipses a=1
+            setColorRect(data, x0-1 - lx, y0 - ty, linewidth, linewidth, color);           //finish tip of ellipse
+            setColorRect(data, x1+1 - lx, (y0++) - ty, linewidth, linewidth, color); 
+            setColorRect(data, x0-1 - lx, y1 - ty, linewidth, linewidth, color); 
+            setColorRect(data, x1+1 - lx, (y1--) - ty, linewidth, linewidth, color); 
         }
 
         // Copy the data we were working with back to the context

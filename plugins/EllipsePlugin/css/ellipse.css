@@ -1,0 +1,41 @@
+/* Tool Button */
+.ellipse-tool-button {
+    background-image: url('../img/ellipse.png');
+}
+
+/* Tool Options */
+.tool-option.ellipse-plugin-option {
+    --ep-option-padding: 4px;
+    --ep-option-color-border: black;
+    --ep-option-color-border-selected: white;
+    --ep-option-color-size: 1px;
+    --ep-option-color-fill: rgb(160, 160, 160);
+    --ep-option-color-fill-selected: rgb(160, 160, 160);
+
+    position: relative;
+}
+
+.tool-option.ellipse-plugin-option::after {
+    position: absolute;
+    left: var(--ep-option-padding);
+    right: var(--ep-option-padding); 
+    top: var(--ep-option-padding);
+    bottom: var(--ep-option-padding);
+    content: ' ';
+}
+
+.tool-option.ellipse-plugin-option.ep-border::after {
+    border: var(--ep-option-color-size) solid var(--ep-option-color-border);
+}
+
+.tool-option.ellipse-plugin-option.ep-border.selected::after {
+    border: var(--ep-option-color-size) solid var(--ep-option-color-border-selected);
+}
+
+.tool-option.ellipse-plugin-option.ep-fill::after {
+    background-color: var(--ep-option-color-fill);
+}
+
+.tool-option.ellipse-plugin-option.ep-fill.selected::after {
+    background-color: var(--ep-option-color-fill-selected);
+}
